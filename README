@@ -27,7 +27,7 @@ any important variable changes.
 
 Better Cache also allows a syntax of giving defaults to key variables:
 
-    {% cache 500 "test" x:10 %}
+    {% cache 500 "test" x=10 %}
 
 ### Controlling inheritence
 

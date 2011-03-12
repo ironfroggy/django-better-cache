@@ -67,7 +67,7 @@ class CacheNode(template.Node):
 
         for vary_var in all_stack_vary_on:
             try:
-                vary_var, default = vary_var.split(':')
+                vary_var, default = vary_var.split('=')
             except ValueError:
                 pass
             try:
