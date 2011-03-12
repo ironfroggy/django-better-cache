@@ -1,0 +1,15 @@
+{% load bettercache %}
+
+<html>
+    <head>
+        <title>Better Cache Demo</title>
+    </head>
+    <body>
+        {% cache 60 "test" x:0  %}
+            x = {{ x }}
+            {% cache 60 "test-inner" y:10 %}
+                y = {{ y }}
+            {% endcache %}
+        {% endcache %}
+    </body>
+</html>
