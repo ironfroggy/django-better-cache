@@ -30,6 +30,11 @@ class CacheNode(template.Node):
         self.fragment_name = fragment_name
         self.vary_on = vary_on
 
+        self.additional_keys = []
+
+    def add_keys(self, keys):
+        self.additional_keys.extend(keys)
+
     def push_keys(self, keys):
         self.key_stack.append(keys)
 
@@ -41,6 +46,13 @@ class CacheNode(template.Node):
             if name == fragmentname:
                 return node
         raise KeyError
+
+    def get_parent(self):
+        try:
+            parent_name, parent = self.fragment_stack[-2]
+            return parent
+        except IndexError:
+            raise ValueError
 
     def make_cache_key(self, context):
         all_stack_vary_on = itertools.chain(*self.key_stack)
@@ -78,6 +90,18 @@ class CacheNode(template.Node):
             if value is None:
                 value = self.nodelist.render(context)
                 cache.set(cache_key, value, expire_time)
+
+                # Did we get new keys from any child caches?
+                if self.additional_keys:
+                    pass # I don't know what to do here
+
+                # Push our keys into our parent
+                try:
+                    parent = self.get_parent()
+                except ValueError:
+                    pass
+                else:
+                    parent.add_keys(self.vary_on)
 
             return value
         finally:
