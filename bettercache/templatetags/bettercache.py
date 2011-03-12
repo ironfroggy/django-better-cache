@@ -33,7 +33,13 @@ class CacheNode(template.Node):
         self.additional_keys = []
 
     def add_keys(self, keys):
-        self.additional_keys.extend(keys)
+        leaking_keys = []
+        for key in keys:
+            if key == 'local':
+                break
+            else:
+                leaking_keys.append(key)
+        self.additional_keys.extend(leaking_keys)
 
     def push_keys(self, keys):
         self.key_stack.append(keys)
@@ -104,6 +110,7 @@ class CacheNode(template.Node):
                     cache.set(cache_key + '::extra_keys', self.additional_keys, expire_time)
 
                 # Push our keys into our parent
+                # Unless they are local
                 try:
                     parent = self.get_parent()
                 except ValueError:
