@@ -22,7 +22,7 @@ def do_cache(parser, token):
 class CacheNode(template.Node):
     
     key_stack = []
-    fragment_stack = {}
+    fragment_stack = []
     
     def __init__(self, nodelist, expire_time_var, fragment_name, vary_on):
         self.nodelist = nodelist
@@ -35,6 +35,12 @@ class CacheNode(template.Node):
 
     def pop_keys(self):
         return self.key_stack.pop()
+    
+    def get_fragment_by_name(self, name):
+        for fragmentname, node in self.fragment_stack:
+            if name == fragmentname:
+                return node
+        raise KeyError
 
     def make_cache_key(self, context):
         all_stack_vary_on = itertools.chain(*self.key_stack)
@@ -55,11 +61,7 @@ class CacheNode(template.Node):
 
         args = md5_constructor(u':'.join([urlquote(value) for value in vary_values]))
 
-        self.fragment_stack[self.fragment_name] = self
-        try:
-            fragment_name = ":".join(self.fragment_stack)
-        finally:
-            del self.fragment_stack[self.fragment_name]
+        fragment_name = ":".join(name for (name, node) in self.fragment_stack)
 
         cache_key = 'bettercache.%s.%s' % (fragment_name, args.hexdigest())
 
@@ -69,6 +71,7 @@ class CacheNode(template.Node):
         expire_time = int(self.expire_time_var.resolve(context))
 
         self.key_stack.append(self.vary_on)
+        self.fragment_stack.append((self.fragment_name, self))
         try:
             cache_key = self.make_cache_key(context)
             value = cache.get(cache_key)
@@ -79,6 +82,7 @@ class CacheNode(template.Node):
             return value
         finally:
             self.key_stack.pop()
+            self.fragment_stack.pop()
 
 
 register.tag('cache', do_cache)
