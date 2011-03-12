@@ -21,12 +21,14 @@
         </form>
         <div class=cache>
             <h3>Cache on x</h3>
+            x = {{ x }}<br />
+            y = {{ y }}<br />
             {% cache 60 "test" x:"0" %}
                 <div class=cache>
                     <h3>Cache on y</h3>
                     {% cache 60 "test-inner" y:"0" %}
-                        y = {{ y }}<br />
                         x = {{ x }}<br />
+                        y = {{ y }}<br />
                     {% endcache %}
                 </div>
             {% endcache %}
