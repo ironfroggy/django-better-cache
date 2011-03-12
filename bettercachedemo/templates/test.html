@@ -3,13 +3,33 @@
 <html>
     <head>
         <title>Better Cache Demo</title>
+        <style>
+            .cache {
+                border: 1px dashed #ccc;
+                padding: 20px;
+            }
+                .cache h3 {
+                    margin: 0px;
+                }
+        </style>
     </head>
     <body>
-        {% cache 60 "test" x:0  %}
-            x = {{ x }}
-            {% cache 60 "test-inner" y:10 %}
-                y = {{ y }}
+        <form>
+            <label>x <input name=x value="{{x}}" /></label>
+            <label>y <input name=y value="{{y}}" /></label>
+            <input type=submit />
+        </form>
+        <div class=cache>
+            <h3>Cache on x</h3>
+            {% cache 60 "test" x:"0" %}
+                <div class=cache>
+                    <h3>Cache on y</h3>
+                    {% cache 60 "test-inner" y:"0" %}
+                        y = {{ y }}<br />
+                        x = {{ x }}<br />
+                    {% endcache %}
+                </div>
             {% endcache %}
-        {% endcache %}
+        </div>
     </body>
 </html>
