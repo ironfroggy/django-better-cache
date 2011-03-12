@@ -22,7 +22,7 @@ def do_cache(parser, token):
 class CacheNode(template.Node):
     
     key_stack = []
-    fragment_stack = []
+    fragment_stack = {}
     
     def __init__(self, nodelist, expire_time_var, fragment_name, vary_on):
         self.nodelist = nodelist
@@ -55,11 +55,11 @@ class CacheNode(template.Node):
 
         args = md5_constructor(u':'.join([urlquote(value) for value in vary_values]))
 
-        self.fragment_stack.append(self.fragment_name)
+        self.fragment_stack[self.fragment_name] = self
         try:
             fragment_name = ":".join(self.fragment_stack)
         finally:
-            self.fragment_stack.pop()
+            del self.fragment_stack[self.fragment_name]
 
         cache_key = 'bettercache.%s.%s' % (fragment_name, args.hexdigest())
 
