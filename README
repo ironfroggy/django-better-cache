@@ -29,7 +29,23 @@ Better Cache also allows a syntax of giving defaults to key variables:
 
     {% cache 500 "test" x:10 %}
 
+### Controlling inheritence
+
+You don't always want the outer cache fragments to invalidate when variables
+only important to the inner fragment changes. In some cases, the inner fragment
+is allowed to get stale if it stays cached longer as part of the parent, so
+we want a way to disable the inheritence of the variables.
+
+You can do this with the `local` modifier. All modifiers after the `local` will
+affect only this cache fragment, not its parent.
+
+    {% cache 500 "outer" x %}
+        y = {{ y }}<br />
+        {% cache 500 "inner" local y %}
+            x = {{ x }}<br />
+        {% endcache %}
+    {% endcache %}
+
 ### Plans
 
- - Be able to control the inheritence of keys
  - on-demand invalidation of fragments based on model keys
