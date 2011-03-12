@@ -54,8 +54,9 @@ class CacheNode(template.Node):
         except IndexError:
             raise ValueError
 
-    def make_cache_key(self, context):
-        all_stack_vary_on = itertools.chain(*self.key_stack)
+    def make_cache_key(self, context, extra_args=()):
+        args = list(self.key_stack) + [list(extra_args)]
+        all_stack_vary_on = itertools.chain(*args)
         vary_values = []
 
         for vary_var in all_stack_vary_on:
@@ -86,14 +87,21 @@ class CacheNode(template.Node):
         self.fragment_stack.append((self.fragment_name, self))
         try:
             cache_key = self.make_cache_key(context)
+            
+            extra_keys = cache.get(cache_key + '::extra_keys')
+            if extra_keys is not None:
+                cache_key = self.make_cache_key(context, extra_keys)
+
             value = cache.get(cache_key)
+
             if value is None:
                 value = self.nodelist.render(context)
                 cache.set(cache_key, value, expire_time)
 
                 # Did we get new keys from any child caches?
+                # We put the new keys, unresolved, in {{key}}::extra_keys
                 if self.additional_keys:
-                    pass # I don't know what to do here
+                    cache.set(cache_key + '::extra_keys', self.additional_keys, expire_time)
 
                 # Push our keys into our parent
                 try:
@@ -102,6 +110,8 @@ class CacheNode(template.Node):
                     pass
                 else:
                     parent.add_keys(self.vary_on)
+                    if self.additional_keys:
+                        parent.add_keys(self.additional_keys)
 
             return value
         finally:
