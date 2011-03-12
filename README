@@ -1,0 +1,26 @@
+## Better Cache
+
+Better Cache is a replacement for the default cache template tag library from Django.
+It is a better version of {% cache %}
+
+What is better about Better Cache?
+
+ - Nested cache fragments inherit the variables their parent fragments key on
+ - Parent cache fragments can be given additional keys by their child cache fragments
+
+An example:
+
+    {% cache 500 "outer" x %}
+        y = {{ y }}<br />
+        {% cache 500 "inner" y %}
+            x = {{ x }}<br />
+        {% endcache %}
+    {% endcache %}
+
+In the default {% cache %} tag from Django, the inner fragment will not be
+rerendered when x changes, because only the outer fragment uses that as a key
+variable. The outer fragment will not update with y changes, because only the
+inner fragment uses that.
+
+With Better Cache, x and y affect both, so fragments will be re-rendered when
+any important variable changes.
