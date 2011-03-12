@@ -18,31 +18,45 @@
             <label>x <input name=x value="{{x}}" /></label>
             <label>y <input name=y value="{{y}}" /></label>
             <label>z <input name=z value="{{z}}" /></label>
+            <label>foo <input name=foo value="{{foo}}" /></label>
             <input type=submit />
         </form>
         x = {{ x }}<br />
         y = {{ y }}<br />
         z = {{ z }}<br />
+        foo = {{ foo }}<br />
         <div class=cache>
-            {% cache 500 "test" x:"0" %}
+            {% cache 500 "test" x="0" %}
             <h3>Cache on x</h3>
             x = {{ x }}<br />
             y = {{ y }}<br />
             z = {{ z }}<br />
+            foo = {{ foo }}<br />
                 <div class=cache>
-                    {% cache 500 "test-inner" y:"0" %}
+                    {% cache 500 "test-inner" y="0" %}
                     <h3>Cache on y</h3>
                         x = {{ x }}<br />
                         y = {{ y }}<br />
                         z = {{ z }}<br />
+                        foo = {{ foo }}<br />
                     {% endcache %}
                 </div>
                 <div class=cache>
-                    {% cache 500 "test-inner-2" z:"0" %}
+                    {% cache 500 "test-inner-2" z="0" %}
                     <h3>Cache on z</h3>
                         x = {{ x }}<br />
                         y = {{ y }}<br />
                         z = {{ z }}<br />
+                        foo = {{ foo }}<br />
+                    {% endcache %}
+                </div>
+                <div class=cache>
+                    {% cache 500 "test-inner-3" local foo:"0" %}
+                    <h3>Cache on foo, don't add to parent</h3>
+                        x = {{ x }}<br />
+                        y = {{ y }}<br />
+                        z = {{ z }}<br />
+                        foo = {{ foo }}<br />
                     {% endcache %}
                 </div>
             {% endcache %}
