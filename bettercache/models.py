@@ -1,3 +1,1 @@
-from django.db import models
-
-# Create your models here.
+"""There are no models in this app."""

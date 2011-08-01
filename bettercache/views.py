@@ -1,1 +1,1 @@
-# Create your views here.
+"""There are no views in this app."""
