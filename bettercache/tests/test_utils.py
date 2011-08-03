@@ -11,8 +11,10 @@ class TestCCDict(TestCase):
     def test_get_cc_dict(self):
         resp = HttpResponse()
         resp['Cache-Control'] = 'x=1, y'
-        expected = dict(x=1, y=True)
-        self.assertEqual(get_cc_dict(resp), expected)
+        expected = dict(x='1', y=True)
+        actual = get_cc_dict(resp)
+        for k in expected:
+            self.assertEqual(expected[k], actual[k])
 
 class TestPostPre(TestCase):
     def setUp(self):
@@ -34,10 +36,10 @@ class TestPostPre(TestCase):
 
     def testsimple(self):
         """ make sure the headers get computed and added correctly """
-        self.resp['max-age'] = 100
+        self.resp['Cache-Control'] = "max-age=100"
         ccd = self.do_cc(self.resp)
-        self.assertEqual(ccd['pre-check'], 100)
-        self.assertEqual(ccd['post-check'], 50)
+        self.assertEqual(ccd['pre-check'], '100')
+        self.assertEqual(ccd['post-check'], '50')
 
     def test_no_max_age(self):
         """ make sure no headers get added if there is no max-age """
@@ -46,7 +48,7 @@ class TestPostPre(TestCase):
         self.assertFalse('post-check' in ccd)
 
     def test_no_overwrite(self):
-        self.resp['max-age'] = 100
+        self.resp['Cache-Control'] = "max-age=100"
         patch_cache_control(self.resp, **{'pre-check' : 10})
         ccd = self.do_cc(self.resp)
-        self.assertEqual(ccd['pre-check'], 10)
+        self.assertEqual(ccd['pre-check'], '10')

@@ -6,6 +6,11 @@ from bettercache.utils import set_post_pre_check_headers
 
 class BetterUpdateCacheMiddleware(UpdateCacheMiddleware):
 
+    def set_headers(self, request, response):
+        """ Hook for setting additional headers """
+        set_post_pre_check_headers(response)
+        response['Edge-Control'] = "max-age=1d"
+
     def process_response(self, request, response):
         """ Sets the cache, if needed.
             Copied from django so headers are only updated when appropriate.
@@ -26,7 +31,7 @@ class BetterUpdateCacheMiddleware(UpdateCacheMiddleware):
             return response
         patch_response_headers(response, timeout)
         # This is the only difference from django for now
-        set_post_pre_check_headers(response)
+        self.set_headers(request, response)
         if timeout:
             cache_key = learn_cache_key(request, response, timeout, self.key_prefix, cache=self.cache)               
             if hasattr(response, 'render') and callable(response.render):                                            
