@@ -12,9 +12,12 @@ setup(
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine
+
+    # Testing removing from install_requires -MH
+    #'django>=1.3,<1.4',
+
     install_requires = [
         'docutils>=0.3',
-        'django>=1.3,<1.4',
     ],
 
     include_package_data=True,
