@@ -2,7 +2,6 @@ from unittest2 import TestCase
 
 from django.conf import settings
 from django.http import HttpResponse
-from django.test import TestCase as DJTestCase
 from django.utils.cache import patch_cache_control
 
 from bettercache.utils import get_cc_dict, set_post_pre_check_headers
@@ -34,7 +33,7 @@ class TestPostPre(TestCase):
         return get_cc_dict(response)
 
 
-    def testsimple(self):
+    def test_simple(self):
         """ make sure the headers get computed and added correctly """
         self.resp['Cache-Control'] = "max-age=100"
         ccd = self.do_cc(self.resp)
@@ -49,6 +48,7 @@ class TestPostPre(TestCase):
 
     def test_no_overwrite(self):
         self.resp['Cache-Control'] = "max-age=100"
-        patch_cache_control(self.resp, **{'pre-check' : 10})
+        patch_cache_control(self.resp, **{'pre-check' : 10, 'post-check' : 1,})
         ccd = self.do_cc(self.resp)
         self.assertEqual(ccd['pre-check'], '10')
+        self.assertEqual(ccd['post-check'], '1')
