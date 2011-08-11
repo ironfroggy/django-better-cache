@@ -33,7 +33,7 @@ class BetterUpdateCacheMiddleware(UpdateCacheMiddleware):
         # This is the only difference from django for now
         self.set_headers(request, response)
         if timeout:
-            cache_key = learn_cache_key(request, response, timeout, self.key_prefix)               
+            cache_key = learn_cache_key(request, response, timeout, self.key_prefix, cache=self.cache)               
             if hasattr(response, 'render') and callable(response.render):                                            
                 response.add_post_render_callback(
                     lambda r: self.cache.set(cache_key, r, timeout)                                                  
