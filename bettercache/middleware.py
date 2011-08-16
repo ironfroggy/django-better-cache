@@ -4,6 +4,15 @@ from django.utils.cache import patch_response_headers, get_cache_key, get_max_ag
 
 from bettercache.utils import set_post_pre_check_headers
 
+
+class TestAsyncMiddleware(object):
+    """ Does not deal with middleware sideeffects """
+    def process_request(self, request):
+        from bettercache.tasks import GeneratePage 
+        response = GeneratePage().run(request)
+        return response
+
+
 class BetterUpdateCacheMiddleware(UpdateCacheMiddleware):
 
     def set_headers(self, request, response):
