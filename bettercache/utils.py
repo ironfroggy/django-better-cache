@@ -1,7 +1,95 @@
-from django.conf import settings
-from django.utils.cache import cc_delim_re, patch_cache_control, get_max_age
+from datetime.datetime import now
+from datetime import timedelta
 
-def get_cc_dict(response):
+from django.utils.encoding import smart_str
+from django.conf import settings
+from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re, patch_cache_control, get_max_age
+
+#TODO: what other codes can we cache redirects? 404s?
+CACHABLE_STATUS = [200,]
+
+class CachingMixin(object):
+    def patch_headers(self, response):
+        """ set the headers we want for caching """
+        # Remove Vary:Cookie if we want to cache non-anonymous
+        if not getattr(settings, 'CACHE_MIDDLEWARE_ANONYMOUS_ONLY', False):
+            vdict = get_header_dict(response, 'Vary')
+            try:
+                vdict.pop('Cookie')
+            except KeyError:
+                pass 
+
+        #  Set max-age, post-check and pre-check
+        cc_headers = get_header_dict(response, 'Cache-Control')
+        try:
+            timeout = cc_headers['max-age']
+        except KeyError:
+            timeout = settings.CACHE_MIDDLEWARE_SECONDS
+            cc_headers['max-age'] = timeout
+        # This should never happen but let's be safe
+        if timeout is 0:
+            return response
+        new_headers = {}
+        if not 'pre-check' in cc_headers:
+           new_headers['pre-check'] = timeout
+        if not 'post-check' in cc_headers:
+           new_headers['post-check'] = int(timeout * settings.CACHE_POST_CHECK_RATIO)
+        set_header_dict(response, 'Cache-Control', new_headers)
+        # this should be the main/first place we're setting edge control so we can just set what we want
+        ec_dict = {'cache-maxage' :settings.BETTERCACHE_MAXAGE}
+        set_header_dict(response, 'Edge-Control', ec_dict)
+        return response
+
+ 
+    def session_accessed(self, request):
+        """ from django.middleware.cache.UpdateCacheMiddleware._session_accesed 
+            I don't know what would cause sessions.acccessed to be there so I'm just copypasting """
+        try:
+            return request.session.accessed
+        except AttributeError:
+            return False
+
+    def should_cache(self, request, response):
+        if not response.status_code in CACHABLE_STATUS:
+            return False
+        if getattr(settings, 'CACHE_MIDDLEWARE_ANONYMOUS_ONLY', False) and self.session_accessed and request.user.is_authenticated:
+            return False
+        if get_max_age(response) == 0:
+            return False
+        #TODO: there are other conditions that should stop caching too
+        return True
+
+    def set_cache(self, request, response):
+        # TODO: we need to use two timeouts here
+        timeout = get_max_age(request)
+        if not timeout < settings.CACHE_MIDDLEWARE_SECONDS:
+            timeout = settings.BETTERCACHE_MAXAGE
+        cache_key = learn_cache_key(request, response, timeout, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
+        #presumably this is to deal with requests with attr functions that won't pickle
+        if hasattr(response, 'render') and callable(response.render):
+            response.add_post_render_callback(lambda r: self.cache.set(cache_key, r, timeout))
+        else:
+            self.cache.set(cache_key, (response, now(),) , timeout)
+
+    def get_cache(self, request):
+        # try and get the cached GET response
+        cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'GET', cache=self.cache)
+        if cache_key is None:
+            request._cache_update_cache = True
+            return None # No cache information available, need to rebuild.
+        cached_response = self.cache.get(cache_key, None)
+        # if it wasn't found and we are looking for a HEAD, try looking just for that
+        if cached_response is None and request.method == 'HEAD':
+            cache_key = get_cache_key(request, self.key_prefix, 'HEAD', cache=self.cache)
+            cached_response = self.cache.get(cache_key, None)
+        if cached_response is None:
+            return None, None
+        if cached_response[1] > now() - timedelta(seconds=settings.BETTERCACHE_INTERNAL_POSTCHECK):
+            return cached_response[0], True
+        return cached_response[0], False
+
+
+def get_header_dict(response, header):
     """ returns a dictionary of the cache control headers
         the same as is used by django.utils.cache.patch_cache_control 
         if there are no Cache-Control headers returns and empty dict
@@ -13,17 +101,27 @@ def get_cc_dict(response):
         else:
             return (t[0].lower(), True)
 
-    if response.has_header('Cache-Control'):
-        cc = dict([dictitem(el) for el in cc_delim_re.split(response['Cache-Control'])])
+    if response.has_header(''):
+        hd = dict([dictitem(el) for el in cc_delim_re.split(response['Cache-Control'])])
     else:
-        cc= {}
-    return cc
+        hd= {}
+    return hd
+
+def set_header_dict(response, header, header_dict):
+    """ formats and sets a header dict in a response, inververs of get_header_dict """
+    def dictvalue(t):
+        if t[1] is True:
+            return t[0]
+        return t[0] + '=' + smart_str(t[1])
+
+    response[header] = ', '.join([dictvalue(el) for el in header_dict.items()])
+
 
 def set_post_pre_check_headers(response):
     """ Set the post_check and pre_check headers if not set based on settings and max_age """
     max_age = get_max_age(response)
     if max_age:
-        cc_headers = get_cc_dict(response)
+        cc_headers = get_header_dict(response, 'Cache-Control')
         new_headers = {}
         if not 'pre-check' in cc_headers:
            new_headers['pre-check'] = max_age
@@ -31,3 +129,13 @@ def set_post_pre_check_headers(response):
            new_headers['post-check'] = int(max_age * settings.CACHE_POST_CHECK_RATIO)
         if new_headers:
             patch_cache_control(response, **new_headers)
+
+def smart_import(mpath):
+    """ Given a path smart_import will import the module and return the attr reffered to """
+    try:
+        rest = __import__(mpath)
+    except ImportError:
+        split = mpath.split('.')
+        rest = smart_import('.'.join(split[:-1]))
+        rest = getattr(rest, split[-1])
+    return rest
