@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re, patch_cache_control, get_max_age
 
 #TODO: what other codes can we cache redirects? 404s?
+# check httpspec
 CACHABLE_STATUS = [200,]
 
 class CachingMixin(object):
@@ -16,6 +17,7 @@ class CachingMixin(object):
             vdict = get_header_dict(response, 'Vary')
             try:
                 vdict.pop('Cookie')
+                # TODO: don't forget to set the cookie
             except KeyError:
                 pass 
 
@@ -57,15 +59,19 @@ class CachingMixin(object):
         if get_max_age(response) == 0:
             return False
         #TODO: there are other conditions that should stop caching too
+        # check private, nocache look in the decorator
+        #TODO: check if this is from a cacheable place(in the request)
         return True
 
     def set_cache(self, request, response):
-        # TODO: we need to use two timeouts here
+        # TODO: Do we want to honor timeouts set before here? NO WE SHOULDN"T
         timeout = get_max_age(request)
-        if not timeout < settings.CACHE_MIDDLEWARE_SECONDS:
+        if timeout >= settings.CACHE_MIDDLEWARE_SECONDS:
             timeout = settings.BETTERCACHE_MAXAGE
+        # TODO: does this do the right thing with vary headers
         cache_key = learn_cache_key(request, response, timeout, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
         #presumably this is to deal with requests with attr functions that won't pickle
+        # TODO: get now in here
         if hasattr(response, 'render') and callable(response.render):
             response.add_post_render_callback(lambda r: self.cache.set(cache_key, r, timeout))
         else:
@@ -77,6 +83,7 @@ class CachingMixin(object):
         if cache_key is None:
             request._cache_update_cache = True
             return None # No cache information available, need to rebuild.
+        # TODO: is a tuple
         cached_response = self.cache.get(cache_key, None)
         # if it wasn't found and we are looking for a HEAD, try looking just for that
         if cached_response is None and request.method == 'HEAD':
