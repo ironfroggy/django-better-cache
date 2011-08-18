@@ -1,5 +1,4 @@
-from datetime.datetime import now
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.utils.encoding import smart_str
 from django.conf import settings
@@ -85,9 +84,9 @@ class CachingMixin(object):
         cache_key = learn_cache_key(request, response, settings.BETTERCACHE_MAXAGE, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
         #presumably this is to deal with requests with attr functions that won't pickle
         if hasattr(response, 'render') and callable(response.render):
-            response.add_post_render_callback(lambda r: self.cache.set(cache_key, (r, now(),), settings.BETTERCACHE_MAXAGE))
+            response.add_post_render_callback(lambda r: self.cache.set(cache_key, (r, datetime.now(),), settings.BETTERCACHE_MAXAGE))
         else:
-            self.cache.set(cache_key, (response, now(),) , settings.BETTERCACHE_MAXAGE)
+            self.cache.set(cache_key, (response, datetime.now(),) , settings.BETTERCACHE_MAXAGE)
 
     def get_cache(self, request):
         """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
@@ -104,7 +103,7 @@ class CachingMixin(object):
             cached_response = self.cache.get(cache_key, None)
         if cached_response is None:
             return None, None
-        if cached_response[1] > now() - timedelta(seconds=settings.BETTERCACHE_INTERNAL_POSTCHECK):
+        if cached_response[1] > datetime.now() - timedelta(seconds=settings.BETTERCACHE_INTERNAL_POSTCHECK):
             return cached_response[0], True
         return cached_response[0], False
 

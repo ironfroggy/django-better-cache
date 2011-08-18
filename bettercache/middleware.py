@@ -3,7 +3,7 @@ from django.middleware.cache import UpdateCacheMiddleware, FetchFromCacheMiddlew
 from django.utils.cache import patch_response_headers, get_cache_key, get_max_age, learn_cache_key
 
 from bettercache.tasks import GeneratePage
-from bettercache.utils import set_post_pre_check_headers, CacheMixin
+from bettercache.utils import set_post_pre_check_headers, CachingMixin
 
 
 class TestAsyncMiddleware(object):
@@ -15,7 +15,7 @@ class TestAsyncMiddleware(object):
 
 
 
-class BetterCacheMiddleware(CacheMixin):
+class BetterCacheMiddleware(CachingMixin):
     def process_request(self, request):
         """
         Checks whether the page is already cached and returns the cached
