@@ -31,13 +31,11 @@ class BetterCacheMiddleware(CacheMixin):
         if response is None:
             return None # No cache information available, need to rebuild.
 
-        # don't update right since we're just serving from cache
-        request._cache_update_cache = False
         # send off the task if we have to
         if expired:
             GeneratePage.apply_async(request)
-        else:
-            request._cache_update_cache = False
+        # don't update right since we're just serving from cache
+        request._cache_update_cache = False
 
         return response
 
@@ -49,9 +47,8 @@ class BetterCacheMiddleware(CacheMixin):
             # We don't need to update the cache, just return.                                                        
             return response 
 
-        # TODO: now you can get here if you're serving from cache
         response = self.patch_headers(response)
-        self.set_cache()#TODO
+        self.set_cache()
         
         return response
 

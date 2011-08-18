@@ -17,9 +17,10 @@ class CachingMixin(object):
             vdict = get_header_dict(response, 'Vary')
             try:
                 vdict.pop('Cookie')
-                # TODO: don't forget to set the cookie
             except KeyError:
                 pass 
+            else:
+                set_header_dict(response, 'Vary', vdict)
 
         #  Set max-age, post-check and pre-check
         cc_headers = get_header_dict(response, 'Cache-Control')
@@ -52,38 +53,50 @@ class CachingMixin(object):
             return False
 
     def should_cache(self, request, response):
+        """ Given the request and response should it be cached """
+        if not response._cache_update_cache:
+            return False
         if not response.status_code in CACHABLE_STATUS:
             return False
         if getattr(settings, 'CACHE_MIDDLEWARE_ANONYMOUS_ONLY', False) and self.session_accessed and request.user.is_authenticated:
             return False
-        if get_max_age(response) == 0:
+        if self.has_uncacheable_headers(response):
             return False
-        #TODO: there are other conditions that should stop caching too
-        # check private, nocache look in the decorator
-        #TODO: check if this is from a cacheable place(in the request)
         return True
 
+    def has_uncacheable_headers(self, response):
+        """ Should this response be cached based on it's headers
+            broken out from should_cache for flexibility
+        """
+        # TODO: check in the decorator
+        cc_dict = get_header_dict(response, 'Cache-Control')
+        if cc_dict:
+            if not getattr(cc_dict, 'max-age', True):
+                return True
+            if getattr(cc_dict, 'no-cache', False):
+                return True
+            if getattr(cc_dict, 'private', False):
+                return True
+        return False
+
     def set_cache(self, request, response):
-        # TODO: Do we want to honor timeouts set before here? NO WE SHOULDN"T
-        timeout = get_max_age(request)
-        if timeout >= settings.CACHE_MIDDLEWARE_SECONDS:
-            timeout = settings.BETTERCACHE_MAXAGE
+        """ caches the response """
         # TODO: does this do the right thing with vary headers
-        cache_key = learn_cache_key(request, response, timeout, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
+        cache_key = learn_cache_key(request, response, settings.BETTERCACHE_MAXAGE, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
         #presumably this is to deal with requests with attr functions that won't pickle
-        # TODO: get now in here
         if hasattr(response, 'render') and callable(response.render):
-            response.add_post_render_callback(lambda r: self.cache.set(cache_key, r, timeout))
+            response.add_post_render_callback(lambda r: self.cache.set(cache_key, (r, now(),), settings.BETTERCACHE_MAXAGE))
         else:
-            self.cache.set(cache_key, (response, now(),) , timeout)
+            self.cache.set(cache_key, (response, now(),) , settings.BETTERCACHE_MAXAGE)
 
     def get_cache(self, request):
+        """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
+            If there is no cached response return (None, None,)
+        """
         # try and get the cached GET response
         cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'GET', cache=self.cache)
         if cache_key is None:
-            request._cache_update_cache = True
             return None # No cache information available, need to rebuild.
-        # TODO: is a tuple
         cached_response = self.cache.get(cache_key, None)
         # if it wasn't found and we are looking for a HEAD, try looking just for that
         if cached_response is None and request.method == 'HEAD':
