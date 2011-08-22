@@ -9,7 +9,7 @@ class BetterUpdateCacheMiddleware(UpdateCacheMiddleware):
     def set_headers(self, request, response):
         """ Hook for setting additional headers """
         set_post_pre_check_headers(response)
-        response['Edge-control'] = "cache-maxage=270s"
+        response['Edge-control'] = "cache-maxage=%s" %settings.BETTERCACHE_EDGE_CONTROL
 
     def process_response(self, request, response):
         """ Sets the cache, if needed.
