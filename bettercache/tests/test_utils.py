@@ -1,54 +1,52 @@
 from unittest2 import TestCase
 
-from django.conf import settings
+import mock
+
+# from django.conf import settings
 from django.http import HttpResponse
-from django.utils.cache import patch_cache_control
 
-from bettercache.utils import get_cc_dict, set_post_pre_check_headers
+from bettercache.utils import get_header_dict, set_header_dict, CachingMixin
 
-class TestCCDict(TestCase):
-    def test_get_cc_dict(self):
+class TestDict(TestCase):
+    def test_get_dict(self):
         resp = HttpResponse()
         resp['Cache-Control'] = 'x=1, y'
         expected = dict(x='1', y=True)
-        actual = get_cc_dict(resp)
+        actual = get_header_dict(resp, 'Cache-Control')
         for k in expected:
             self.assertEqual(expected[k], actual[k])
 
-class TestPostPre(TestCase):
-    def setUp(self):
-        self.resp = HttpResponse()
-        if hasattr(settings, 'CACHE_POST_CHECK_RATIO'):
-            self.real_post_ratio = settings.CACHE_POST_CHECK_RATIO
-        settings.CACHE_POST_CHECK_RATIO = 0.5
+    def test_no_dict(self):
+        resp = HttpResponse()
+        self.assertEqual(get_header_dict(resp, 'Cache-Control'), {})
 
-    def tearDown(self):
-        if hasattr(self, 'real_post_ratio'):
-            settings.CACHE_POST_CHECK_RATIO = self.real_post_ratio
-        else:
-            del settings.CACHE_POST_CHECK_RATIO
-
-    def do_cc(self, response):
-        set_post_pre_check_headers(response)
-        return get_cc_dict(response)
+    def test_set_dict(self):
+        resp = HttpResponse()
+        ccdict = dict(x='1', y=True)
+        set_header_dict(resp, 'Cache-Control', ccdict)
+        self.assertEqual(resp['Cache-Control'], 'y, x=1')
 
 
-    def test_simple(self):
-        """ make sure the headers get computed and added correctly """
-        self.resp['Cache-Control'] = "max-age=100"
-        ccd = self.do_cc(self.resp)
-        self.assertEqual(ccd['pre-check'], '100')
-        self.assertEqual(ccd['post-check'], '50')
+class TestCachingMixin(TestCase):
 
-    def test_no_max_age(self):
-        """ make sure no headers get added if there is no max-age """
-        ccd = self.do_cc(self.resp)
-        self.assertFalse('pre-check' in ccd)
-        self.assertFalse('post-check' in ccd)
 
-    def test_no_overwrite(self):
-        self.resp['Cache-Control'] = "max-age=100"
-        patch_cache_control(self.resp, **{'pre-check' : 10, 'post-check' : 1,})
-        ccd = self.do_cc(self.resp)
-        self.assertEqual(ccd['pre-check'], '10')
-        self.assertEqual(ccd['post-check'], '1')
+    def set_settings(self, settings): 
+        settings.BETTERCACHE_ANONYMOUS_ONLY = False
+        settings.BETTERCACHE_EDGE_MAXAGE = '1d'
+        settings.BETTERCACHE_CACHE_MAXAGE = 60
+        settings.BETTERCACHE_EDGE_POSTCHECK_RATIO = .1
+        settings.BETTERCACHE_LOCAL_POSTCHECK = 60 
+
+    @mock.patch('bettercache.utils.settings')
+    def test_patch_headers(self, settings):
+        resp = HttpResponse()
+        resp['Vary'] = 'cookie, accept-encoding'
+        self.set_settings(settings)
+        cm = CachingMixin()
+        cm.patch_headers(resp)
+        self.assertEqual(resp['Vary'], 'accept-encoding')
+        self.assertEqual(resp['Edge-Control'], 'cache-maxage=1d')
+        ccdict = get_header_dict(resp, 'Cache-Control')
+        self.assertEqual(ccdict['pre-check'], '60')
+        self.assertEqual(ccdict['post-check'], '6')
+        self.assertEqual(ccdict['max-age'], '60')

@@ -12,10 +12,10 @@ class CachingMixin(object):
     def patch_headers(self, response):
         """ set the headers we want for caching """
         # Remove Vary:Cookie if we want to cache non-anonymous
-        if not getattr(settings, 'CACHE_MIDDLEWARE_ANONYMOUS_ONLY', False):
+        if not getattr(settings, 'BETTERCACHE_ANONYMOUS_ONLY', False):
             vdict = get_header_dict(response, 'Vary')
             try:
-                vdict.pop('Cookie')
+                vdict.pop('cookie')
             except KeyError:
                 pass 
             else:
@@ -26,19 +26,18 @@ class CachingMixin(object):
         try:
             timeout = cc_headers['max-age']
         except KeyError:
-            timeout = settings.CACHE_MIDDLEWARE_SECONDS
+            timeout = settings.BETTERCACHE_CACHE_MAXAGE
             cc_headers['max-age'] = timeout
         # This should never happen but let's be safe
         if timeout is 0:
             return response
-        new_headers = {}
         if not 'pre-check' in cc_headers:
-           new_headers['pre-check'] = timeout
+           cc_headers['pre-check'] = timeout
         if not 'post-check' in cc_headers:
-           new_headers['post-check'] = int(timeout * settings.CACHE_POST_CHECK_RATIO)
-        set_header_dict(response, 'Cache-Control', new_headers)
+           cc_headers['post-check'] = int(timeout * settings.BETTERCACHE_EDGE_POSTCHECK_RATIO)
+        set_header_dict(response, 'Cache-Control', cc_headers)
         # this should be the main/first place we're setting edge control so we can just set what we want
-        ec_dict = {'cache-maxage' :settings.BETTERCACHE_MAXAGE}
+        ec_dict = {'cache-maxage' : settings.BETTERCACHE_EDGE_MAXAGE}
         set_header_dict(response, 'Edge-Control', ec_dict)
         return response
 
@@ -81,12 +80,12 @@ class CachingMixin(object):
     def set_cache(self, request, response):
         """ caches the response """
         # TODO: does this do the right thing with vary headers
-        cache_key = learn_cache_key(request, response, settings.BETTERCACHE_MAXAGE, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
+        cache_key = learn_cache_key(request, response, settings.BETTERCACHE_LOCAL_MAXAGE, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
         #presumably this is to deal with requests with attr functions that won't pickle
         if hasattr(response, 'render') and callable(response.render):
-            response.add_post_render_callback(lambda r: self.cache.set(cache_key, (r, datetime.now(),), settings.BETTERCACHE_MAXAGE))
+            response.add_post_render_callback(lambda r: self.cache.set(cache_key, (r, datetime.now(),), settings.BETTERCACHE_LOCAL_MAXAGE))
         else:
-            self.cache.set(cache_key, (response, datetime.now(),) , settings.BETTERCACHE_MAXAGE)
+            self.cache.set(cache_key, (response, datetime.now(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
 
     def get_cache(self, request):
         """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
@@ -103,7 +102,7 @@ class CachingMixin(object):
             cached_response = self.cache.get(cache_key, None)
         if cached_response is None:
             return None, None
-        if cached_response[1] > datetime.now() - timedelta(seconds=settings.BETTERCACHE_INTERNAL_POSTCHECK):
+        if cached_response[1] > datetime.now() - timedelta(seconds=settings.BETTERCACHE_LOCAL_POSTCHECK):
             return cached_response[0], True
         return cached_response[0], False
 
@@ -120,8 +119,8 @@ def get_header_dict(response, header):
         else:
             return (t[0].lower(), True)
 
-    if response.has_header(''):
-        hd = dict([dictitem(el) for el in cc_delim_re.split(response['Cache-Control'])])
+    if response.has_header(header):
+        hd = dict([dictitem(el) for el in cc_delim_re.split(response[header])])
     else:
         hd= {}
     return hd
