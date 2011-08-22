@@ -1,8 +1,10 @@
+import time
 from datetime import datetime, timedelta
 
-from django.utils.encoding import smart_str
-from django.conf import settings
 from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re, patch_cache_control, get_max_age
+from django.utils.encoding import smart_str
+from django.utils.http import parse_http_date
+from django.conf import settings
 
 #TODO: what other codes can we cache redirects? 404s?
 # check httpspec
@@ -66,14 +68,16 @@ class CachingMixin(object):
         """ Should this response be cached based on it's headers
             broken out from should_cache for flexibility
         """
-        # TODO: check in the decorator
         cc_dict = get_header_dict(response, 'Cache-Control')
         if cc_dict:
-            if not getattr(cc_dict, 'max-age', True):
+            if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
                 return True
-            if getattr(cc_dict, 'no-cache', False):
+            if cc_dict.has_key('no-cache'):
                 return True
-            if getattr(cc_dict, 'private', False):
+            if cc_dict.has_key('private'):
+                return True
+        if response.has_header('Expires'):
+            if parse_http_date(response['Expires']) < time.time():
                 return True
         return False
 

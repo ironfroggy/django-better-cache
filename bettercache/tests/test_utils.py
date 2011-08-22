@@ -1,9 +1,11 @@
+import time
 from unittest2 import TestCase
 
 import mock
 
 # from django.conf import settings
 from django.http import HttpResponse, HttpRequest
+from django.utils.http import http_date
 
 from bettercache.utils import get_header_dict, set_header_dict, CachingMixin
 
@@ -78,3 +80,25 @@ class TestCachingMixin(TestCase):
         resp.status_code=200
         req._cache_update_cache = False 
         self.assertFalse(cm.should_cache(req, resp))
+
+    def test_uncacheable_headers(self):
+        resp = HttpResponse()
+        cm = CachingMixin()
+        self.assertFalse(cm.has_uncacheable_headers(resp))
+        resp['Expires'] = http_date(time.time()-100)
+        self.assertTrue(cm.has_uncacheable_headers(resp))
+        resp['Expires'] = http_date(time.time()+100000)
+        self.assertFalse(cm.has_uncacheable_headers(resp))
+        cc_dict = { 'max-age' : 0,}
+        set_header_dict(resp, 'Cache-Control', cc_dict)
+        self.assertTrue(cm.has_uncacheable_headers(resp))
+        cc_dict['max-age'] = 100
+        set_header_dict(resp, 'Cache-Control', cc_dict)
+        self.assertFalse(cm.has_uncacheable_headers(resp))
+        cc_dict['no-cache'] = True
+        set_header_dict(resp, 'Cache-Control', cc_dict)
+        self.assertTrue(cm.has_uncacheable_headers(resp))
+        cc_dict.pop('no-cache')
+        cc_dict['private'] = True
+        set_header_dict(resp, 'Cache-Control', cc_dict)
+        self.assertTrue(cm.has_uncacheable_headers(resp))
