@@ -3,7 +3,7 @@ from unittest2 import TestCase
 import mock
 
 # from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
 from bettercache.utils import get_header_dict, set_header_dict, CachingMixin
 
@@ -50,3 +50,31 @@ class TestCachingMixin(TestCase):
         self.assertEqual(ccdict['pre-check'], '60')
         self.assertEqual(ccdict['post-check'], '6')
         self.assertEqual(ccdict['max-age'], '60')
+
+
+    @mock.patch('bettercache.utils.settings')
+    def test_should_cache(self, settings):
+        self.set_settings(settings)
+        req = HttpRequest()
+        req._cache_update_cache = True
+        req.session = mock.Mock()
+        req.session.accessed = False
+        req.user = mock.Mock()
+        req.user.is_authenticated = False
+        resp = HttpResponse()
+        resp.status_code = 200
+        settings.BETTERCACHE_ANONYMOUS_ONLY = False
+        cm = CachingMixin()
+        self.assertTrue(cm.should_cache(req, resp))
+        settings.BETTERCACHE_ANONYMOUS_ONLY = True
+        self.assertTrue(cm.should_cache(req, resp))
+        req.session.accessed = True
+        self.assertTrue(cm.should_cache(req, resp))
+        req.user.is_authenticated = True
+        self.assertFalse(cm.should_cache(req, resp))
+        settings.BETTERCACHE_ANONYMOUS_ONLY = False
+        resp.status_code=500
+        self.assertFalse(cm.should_cache(req, resp))
+        resp.status_code=200
+        req._cache_update_cache = False 
+        self.assertFalse(cm.should_cache(req, resp))

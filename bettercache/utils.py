@@ -52,11 +52,11 @@ class CachingMixin(object):
 
     def should_cache(self, request, response):
         """ Given the request and response should it be cached """
-        if not response._cache_update_cache:
+        if not request._cache_update_cache:
             return False
         if not response.status_code in CACHABLE_STATUS:
             return False
-        if getattr(settings, 'CACHE_MIDDLEWARE_ANONYMOUS_ONLY', False) and self.session_accessed and request.user.is_authenticated:
+        if getattr(settings, 'BETTERCACHE_ANONYMOUS_ONLY', False) and self.session_accessed and request.user.is_authenticated:
             return False
         if self.has_uncacheable_headers(response):
             return False
