@@ -1,4 +1,5 @@
 import time
+from datetime import datetime, timedelta
 from unittest2 import TestCase
 
 import mock
@@ -8,6 +9,31 @@ from django.http import HttpResponse, HttpRequest
 from django.utils.http import http_date
 
 from bettercache.utils import get_header_dict, set_header_dict, CachingMixin
+
+class FakeCache(object):
+
+    def __init__(self):
+        self.store = {}
+
+    def get(self, key, val, default=None, **kwargs):
+        try:
+            return self.store[key]
+        except KeyError:
+            return default
+
+    def set(self, key, val, timeout=None, **kwargs):
+        self.store[key] = val
+
+    def delete(self, key, **kwargs):
+        try:
+            self.store.pop(key)
+        except KeyError:
+            pass
+    def clear(self):
+        self.store = {}
+
+#TODO: there must be a better way to mock this
+fake_cache = FakeCache()
 
 class TestDict(TestCase):
     def test_get_dict(self):
@@ -102,3 +128,20 @@ class TestCachingMixin(TestCase):
         cc_dict['private'] = True
         set_header_dict(resp, 'Cache-Control', cc_dict)
         self.assertTrue(cm.has_uncacheable_headers(resp))
+
+    @mock.patch('bettercache.utils.settings')
+    @mock.patch('bettercache.utils.get_cache_key')
+    @mock.patch('bettercache.utils.cache', new=fake_cache)
+    def test_get_cache(self, gck, settings):
+        fake_cache.clear()
+        self.set_settings(settings)
+        gck.return_value = None
+        req = HttpRequest()
+        cm = CachingMixin()
+        self.assertEquals(cm.get_cache(req), (None, None))
+        gck.return_value = 'test_key'
+        self.assertEquals(cm.get_cache(req), (None, None))
+        fake_cache.set('test_key', ('resp', datetime.now() - timedelta(days=1))) 
+        self.assertEquals(cm.get_cache(req), ('resp', False))
+        fake_cache.set('test_key', ('resp', datetime.now() + timedelta(days=1))) 
+        self.assertEquals(cm.get_cache(req), ('resp', True))
