@@ -9,8 +9,8 @@ class AsyncHandler(BaseHandler):
         # is there a better way to do this than putting it here?
         # from bettercache.middleware import BetterCacheMiddleware
         super(AsyncHandler, self).load_middleware()
-        # self._request_middleware = [m for m in self._request_middleware if not issubclass(m, BetterCacheMiddleware)] 
-        # self._response_middleware = [m for m in self._response_middleware if not issubclass(m, BetterCacheMiddleware)] 
+        # self._request_middleware = [m for m in self._request_middleware if not issubclass(m, BetterCacheMiddleware)]
+        # self._response_middleware = [m for m in self._response_middleware if not issubclass(m, BetterCacheMiddleware)]
         # middleware_blacklist = [smart_import(midd) for midd in settings.ASYNC_MIDDLEWARE_BLACKLIST]
 
     def __call__(self, request):
