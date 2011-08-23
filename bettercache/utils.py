@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re, patch_cache_control, get_max_age
+from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re
 from django.utils.encoding import smart_str
 from django.utils.http import parse_http_date
 
@@ -64,6 +64,16 @@ class CachingMixin(object):
         if self.has_uncacheable_headers(response):
             return False
         return True
+
+    def should_bypass_cache(self, request):
+        """ Should a request not be served from cache """
+        cc_dict = get_header_dict(request, 'Cache-Control')
+        if cc_dict:
+            if cc_dict.has_key('no-cache'):
+                return True
+            if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
+                return True
+        return False
 
     def has_uncacheable_headers(self, response):
         """ Should this response be cached based on it's headers

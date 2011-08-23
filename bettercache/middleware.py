@@ -21,8 +21,11 @@ class BetterCacheMiddleware(CachingMixin):
             request._cache_update_cache = False
             return None # Don't bother checking the cache.
 
-        response, expired = self.get_cache(request)
         request._cache_update_cache = True
+        if self.should_bypass_cache(self, request):
+            return None
+
+        response, expired = self.get_cache(request)
 
         if response is None:
             return None # No cache information available, need to rebuild.
