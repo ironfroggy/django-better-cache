@@ -67,12 +67,8 @@ class CachingMixin(object):
 
     def should_bypass_cache(self, request):
         """ Should a request not be served from cache """
-        cc_dict = get_header_dict(request, 'Cache-Control')
-        if cc_dict:
-            if cc_dict.has_key('no-cache'):
-                return True
-            if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
-                return True
+        if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
+            return True
         return False
 
     def has_uncacheable_headers(self, response):

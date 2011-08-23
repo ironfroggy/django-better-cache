@@ -10,7 +10,7 @@ class GeneratePage(Task, CachingMixin):
         if not self.should_rebuild(request):
             return
         handler = AsyncHandler()
-        response = handler.get_response(request)
+        response = handler(request)
         if self.should_cache(request, response):
             self.patch_headers(response)
             self.set_cache(request, response)

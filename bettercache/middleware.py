@@ -5,6 +5,9 @@ from bettercache.utils import CachingMixin
 class TestAsyncMiddleware(object):
     """ Does not deal with middleware sideeffects """
     def process_request(self, request):
+        if hasattr(request, '_cache_update_cache'):
+            return None
+        request._cache_update_cache = False
         response = GeneratePage().run(request)
         return response
 
@@ -22,7 +25,7 @@ class BetterCacheMiddleware(CachingMixin):
             return None # Don't bother checking the cache.
 
         request._cache_update_cache = True
-        if self.should_bypass_cache(self, request):
+        if self.should_bypass_cache(request):
             return None
 
         response, expired = self.get_cache(request)
@@ -40,8 +43,7 @@ class BetterCacheMiddleware(CachingMixin):
         return response
 
     def process_response(self, request, response):
-        """ Sets the cache, if needed.
-            Copied from django so headers are only updated when appropriate.
+        """ Sets the cache and deals with caching headers if needed
         """                                                                             
         if not self.should_cache(request, response):
             # We don't need to update the cache, just return.                                                        

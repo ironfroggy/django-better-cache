@@ -15,5 +15,5 @@ class AsyncHandler(BaseHandler):
 
     def __call__(self, request):
         self.load_middleware()
-        response = self.get_response()
+        response = self.get_response(request)
         return response
