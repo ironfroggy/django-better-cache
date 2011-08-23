@@ -20,7 +20,3 @@ class TestMiddleware(TestCase):
         CM.get_cache.return_value = (None, None,)
         self.assertEqual(bcm.process_request(request), None)
         self.assertTrue(request._cache_update_cache)
-        # CM.get_cache.return_value = ('RESP', True,)
-        # self.assertEqual(bcm.process_request(request), 'RESP')
-        # self.assertFalse(request._cache_update_cache)
-        # self.assertTrue(GM.apply_async.called)

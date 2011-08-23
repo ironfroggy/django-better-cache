@@ -4,7 +4,6 @@ from unittest2 import TestCase
 
 import mock
 
-# from django.conf import settings
 from django.http import HttpResponse, HttpRequest
 from django.utils.http import http_date
 
