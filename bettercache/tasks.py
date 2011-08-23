@@ -7,7 +7,7 @@ class GeneratePage(Task, CachingMixin):
     """ GeneratePage takes a request and generates a response which it sticks in the cache if appropriate """
 
     def run(self, request, *args, **kwargs):
-        if self.should_rebuild(request):
+        if not self.should_rebuild(request):
             return
         handler = AsyncHandler()
         response = handler.get_response(request)
