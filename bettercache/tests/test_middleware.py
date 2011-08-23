@@ -10,10 +10,12 @@ class TestMiddleware(TestCase):
     def test_req(self, GM, CM):
         request = mock.Mock()
         request.method = 'POST'
+        request._cache_update_cache = False
         bcm = BetterCacheMiddleware()
         self.assertEqual(bcm.process_request(request), None)
         self.assertFalse(request._cache_update_cache)
         request.method = 'GET'
+        request._cache_update_cache = False
         CM.get_cache.return_value = (None, None,)
         self.assertEqual(bcm.process_request(request), None)
         self.assertTrue(request._cache_update_cache)
