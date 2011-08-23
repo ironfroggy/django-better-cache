@@ -9,8 +9,6 @@ class TestAsyncMiddleware(object):
         return response
 
 
-
-
 class BetterCacheMiddleware(CachingMixin):
     def process_request(self, request):
         """
