@@ -53,7 +53,7 @@ class CachingMixin(object):
 
     def should_cache(self, request, response):
         """ Given the request and response should it be cached """
-        if not request._cache_update_cache:
+        if not getattr(request, '_cache_update_cache', False):
             return False
         if not response.status_code in CACHABLE_STATUS:
             return False
