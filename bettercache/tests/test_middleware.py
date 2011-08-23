@@ -11,6 +11,7 @@ class TestMiddleware(TestCase):
         request = mock.Mock()
         request.method = 'POST'
         request._cache_update_cache = False
+        request.META = {'HTTP_CACHE_CONTROL' : ''}
         bcm = BetterCacheMiddleware()
         self.assertEqual(bcm.process_request(request), None)
         self.assertFalse(request._cache_update_cache)

@@ -160,3 +160,12 @@ class TestCachingMixin(TestCase):
         resp.render = lambda : 1
         cm.set_cache(req, resp)
         self.assertTrue(resp.add_post_render_callback.called)
+
+    def test_bypass_cache(self):
+        req = mock.Mock()
+        req.META = {'HTTP_CACHE_CONTROL' : 'max-age=0'}
+        cm = CachingMixin()
+        self.assertFalse(cm.should_bypass_cache(req))
+        req.META['HTTP_CACHE_CONTROL'] = 'max-age=0, no-cache'
+        self.assertTrue(cm.should_bypass_cache(req))
+

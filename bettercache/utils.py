@@ -65,8 +65,11 @@ class CachingMixin(object):
 
     def should_bypass_cache(self, request):
         """ Should a request not be served from cache """
-        if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
-            return True
+        try:
+            if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
+                return True
+        except KeyError:
+            pass
         return False
 
     def has_uncacheable_headers(self, response):
