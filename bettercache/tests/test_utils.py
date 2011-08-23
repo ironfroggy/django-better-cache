@@ -145,3 +145,18 @@ class TestCachingMixin(TestCase):
         self.assertEquals(cm.get_cache(req), ('resp', False))
         fake_cache.set('test_key', ('resp', datetime.now() + timedelta(days=1))) 
         self.assertEquals(cm.get_cache(req), ('resp', True))
+
+    @mock.patch('bettercache.utils.cache')
+    @mock.patch('bettercache.utils.learn_cache_key')
+    @mock.patch('bettercache.utils.settings')
+    def test_set_cache(self, settings, lck, cache):
+        lck.return_value = 'test'
+        resp = mock.Mock()
+        req = mock.Mock()
+        cm = CachingMixin()
+        resp.render = False
+        cm.set_cache(req, resp)
+        self.assertTrue(cache.set.called)
+        resp.render = lambda : 1
+        cm.set_cache(req, resp)
+        self.assertTrue(resp.add_post_render_callback.called)
