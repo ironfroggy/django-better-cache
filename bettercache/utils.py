@@ -7,9 +7,7 @@ from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re
 from django.utils.encoding import smart_str
 from django.utils.http import parse_http_date
 
-#TODO: what other codes can we cache redirects? 404s?
-# check httpspec
-CACHABLE_STATUS = [200,]
+CACHABLE_STATUS = [200, 203, 300, 301, 410]
 
 class CachingMixin(object):
     def patch_headers(self, response):
