@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re
 from django.utils.encoding import smart_str
-from django.utils.http import parse_http_date
+from django.utils.http import http_date, parse_http_date
 
 CACHABLE_STATUS = [200, 203, 300, 301, 410]
 
@@ -40,6 +40,7 @@ class CachingMixin(object):
         # this should be the main/first place we're setting edge control so we can just set what we want
         ec_dict = {'cache-maxage' : settings.BETTERCACHE_EDGE_MAXAGE}
         set_header_dict(response, 'Edge-Control', ec_dict)
+        response['Last-Modified'] = http_date()
         return response
 
  
