@@ -64,7 +64,8 @@ class CachingMixin(object):
             return False
         return True
 
-    def should_bypass_cache(self, request):
+    @static_method
+    def should_bypass_cache(request):
         """ Should a request not be served from cache """
         try:
             if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:

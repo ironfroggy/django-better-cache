@@ -5,6 +5,8 @@ from bettercache.utils import CachingMixin
 class TestAsyncMiddleware(object):
     """ Does not deal with middleware sideeffects """
     def process_request(self, request):
+        if not request.method in ('GET', 'HEAD',) or CachingMixin.should_bypass_cache(request):
+            return None
         if hasattr(request, '_cache_update_cache'):
             return None
         request._cache_update_cache = False
