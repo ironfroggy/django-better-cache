@@ -3,8 +3,11 @@ from celery.task import Task
 from bettercache.handlers import AsyncHandler
 from bettercache.utils import CachingMixin
 
+
 class GeneratePage(Task, CachingMixin):
     """ GeneratePage takes a request and generates a response which it sticks in the cache if appropriate """
+    queue = 'pagegen'
+
 
     def run(self, request, *args, **kwargs):
         if not self.should_rebuild(request):
