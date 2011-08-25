@@ -117,7 +117,7 @@ class CachingMixin(object):
             cached_response = cache.get(cache_key, None)
         if cached_response is None:
             return None, None
-        if cached_response[1] > datetime.now() - timedelta(seconds=settings.BETTERCACHE_LOCAL_POSTCHECK):
+        if cached_response[1] < datetime.now() - timedelta(seconds=settings.BETTERCACHE_LOCAL_POSTCHECK):
             return cached_response[0], True
         return cached_response[0], False
 
@@ -160,8 +160,8 @@ def smart_import(mpath):
     return rest
 
 def strip_wsgi(request):
-    meta = copy(request.META_)
+    meta = copy(request.META)
     for key in meta:
-        if key[:3] == 'wsgi':
+        if key[:4] == 'wsgi':
             meta[key] = None
     return meta

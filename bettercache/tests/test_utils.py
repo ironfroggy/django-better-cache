@@ -141,9 +141,9 @@ class TestCachingMixin(TestCase):
         gck.return_value = 'test_key'
         self.assertEquals(cm.get_cache(req), (None, None))
         fake_cache.set('test_key', ('resp', datetime.now() - timedelta(days=1))) 
-        self.assertEquals(cm.get_cache(req), ('resp', False))
-        fake_cache.set('test_key', ('resp', datetime.now() + timedelta(days=1))) 
         self.assertEquals(cm.get_cache(req), ('resp', True))
+        fake_cache.set('test_key', ('resp', datetime.now() + timedelta(days=1))) 
+        self.assertEquals(cm.get_cache(req), ('resp', False))
 
     @mock.patch('bettercache.utils.cache')
     @mock.patch('bettercache.utils.learn_cache_key')
