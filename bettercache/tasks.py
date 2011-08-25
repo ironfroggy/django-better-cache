@@ -1,5 +1,6 @@
 from celery.task import Task
 
+from django.core.handlers.wsgi import WSGIRequest
 from bettercache.handlers import AsyncHandler
 from bettercache.utils import CachingMixin
 
@@ -9,7 +10,8 @@ class GeneratePage(Task, CachingMixin):
     queue = 'pagegen'
 
 
-    def run(self, request, *args, **kwargs):
+    def run(self, meta, *args, **kwargs):
+        request = WSGIRequest(meta)
         if not self.should_rebuild(request):
             return
         handler = AsyncHandler()

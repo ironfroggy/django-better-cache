@@ -1,4 +1,5 @@
 import time
+from copy import copy
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -157,3 +158,10 @@ def smart_import(mpath):
         rest = smart_import('.'.join(split[:-1]))
         rest = getattr(rest, split[-1])
     return rest
+
+def strip_wsgi(request):
+    meta = copy(request.META_)
+    for key in meta:
+        if key[:3] == 'wsgi':
+            meta[key] = None
+    return meta

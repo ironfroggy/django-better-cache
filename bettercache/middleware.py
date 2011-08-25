@@ -1,5 +1,5 @@
 from bettercache.tasks import GeneratePage
-from bettercache.utils import CachingMixin
+from bettercache.utils import CachingMixin, strip_wsgi
 
 
 class TestAsyncMiddleware(object):
@@ -37,7 +37,7 @@ class BetterCacheMiddleware(CachingMixin):
 
         # send off the task if we have to
         if expired:
-            GeneratePage.apply_async(request)
+            GeneratePage.apply_async((strip_wsgi(request),))
             self.set_cache(request, response)
         # don't update right since we're serving from cache
         request._cache_update_cache = False
