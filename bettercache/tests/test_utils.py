@@ -62,7 +62,8 @@ class TestCachingMixin(TestCase):
         settings.BETTERCACHE_EDGE_MAXAGE = '1d'
         settings.BETTERCACHE_CACHE_MAXAGE = 60
         settings.BETTERCACHE_EDGE_POSTCHECK_RATIO = .1
-        settings.BETTERCACHE_LOCAL_POSTCHECK = 60 
+        settings.BETTERCACHE_LOCAL_POSTCHECK = 60
+        settings.BETTERCACHE_CACHEABLE_STATUS = [200,]
 
     @mock.patch('bettercache.utils.settings')
     def test_patch_headers(self, settings):

@@ -8,7 +8,7 @@ from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re
 from django.utils.encoding import smart_str
 from django.utils.http import http_date, parse_http_date
 
-CACHABLE_STATUS = [200, 203, 300, 301, 410]
+CACHEABLE_STATUS = [200, 203, 300, 301, 404, 410]
 
 class CachingMixin(object):
     def patch_headers(self, response):
@@ -57,7 +57,7 @@ class CachingMixin(object):
         """ Given the request and response should it be cached """
         if not getattr(request, '_cache_update_cache', False):
             return False
-        if not response.status_code in CACHABLE_STATUS:
+        if not response.status_code in getattr(settings, 'BETTERCACHE_CACHEABLE_STATUS', CACHEABLE_STATUS):
             return False
         if getattr(settings, 'BETTERCACHE_ANONYMOUS_ONLY', False) and self.session_accessed and request.user.is_authenticated:
             return False
