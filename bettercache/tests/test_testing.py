@@ -7,6 +7,12 @@ class CachingTestCaseTestCase(CachingTestCase):
     """ a simple test of CachingTestCase """
     keyre = re.compile('foo')
 
+    def setUp(self):
+        pass
+    
+    def tearDown(self):
+        pass
+
     def setFun(self):
         cache.set('foo', 1)
 
