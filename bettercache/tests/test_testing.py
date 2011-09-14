@@ -1,20 +1,22 @@
 import re
-from django.core.cache import cache
+import django.core.cache
 from bettercache.testing import CachingTestCase
 
 
 class CachingTestCaseTestCase(CachingTestCase):
     """ a simple test of CachingTestCase """
     keyre = re.compile('foo')
+    cache_modules = [django.core.cache]
 
     def setUp(self):
-        pass
+        self.real_cache = django.core.cache.cache
+        django.core.cache.cache = self.cache
     
     def tearDown(self):
-        pass
+      django.core.cache.cache = self.real_cache  
 
     def setFun(self):
-        cache.set('foo', 1)
+        django.core.cache.cache.set('foo', 1)
 
     def test_inval(self):
-        cache.delete('foo')
+        django.core.cache.cache.delete('foo')

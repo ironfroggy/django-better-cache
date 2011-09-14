@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.core.cache import cache
+import django.core.cache
 
 class FakeCache(object):
 
@@ -18,13 +18,13 @@ class FakeCache(object):
     def set(self, key, val, timeout=None, **kwargs):
        self.store[key] = val
        if not key in self.set_keys:
-           self.set_keys += key
+           self.set_keys.append(key)
 
     def add(self, key, val, timeout=None, **kwargs):
         if not key in self.store:
             self.store[key] = val
             if not key in self.set_keys:
-               self.set_keys += key
+               self.set_keys.append(key)
             return True
         return False
 
@@ -34,7 +34,7 @@ class FakeCache(object):
         except KeyError:
             pass
         if not key in self.deleted_keys:
-            self.deleted_keys += key
+            self.deleted_keys.append(key)
 
     def clear(self):
         self.store = {}
@@ -44,30 +44,29 @@ class CachingTestMeta(type):
    def __new__(cls, name, bases, attrs):
         oldsetUp = attrs.pop('setUp')
         setFun = attrs.pop('setFun')
+        attrs['cache'] = FakeCache()
         def setUp(self):
             oldsetUp(self)
-            self.real_cache = cache
-            cache = FakeCache()
             setFun(self)
-            self.tracked_keys = [key for key in cache.set_keys if self.keyre.search(key)]
+            self.tracked_keys = [key for key in self.cache.set_keys if self.keyre.search(key)]
+            # import pdb; pdb.set_trace()
             if not self.tracked_keys:
                 raise Exception("No keys are being tracked this test isn't testing anything")
-            cache.set_keys = []
-            cache.deleted_keys = []
+            self.cache.set_keys = []
+            self.cache.deleted_keys = []
 
         attrs['setUp'] = setUp
 
         oldtearDown = attrs.pop('tearDown')
         def tearDown(self):
             oldtearDown(self)
-            cache = self.real_cache
         attrs['tearDown'] = tearDown
 
         def check_keys(self, accept_del=True):
-            changed_keys = cache.set_keys
+            changed_keys = self.cache.set_keys
             if accept_del:
-                changed_keys += cache.deleted_keys
-            for key in expected_keys:
+                changed_keys += self.cache.deleted_keys
+            for key in self.tracked_keys:
                 self.assertTrue(key in changed_keys) #TODO: make this explicit when it fails
 
         nattrs = {}
