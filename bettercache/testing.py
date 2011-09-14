@@ -40,42 +40,28 @@ class FakeCache(object):
         self.store = {}
 
 
-
 class CachingTestMeta(type):
    def __new__(cls, name, bases, attrs):
-        try:
-            setFun = attrs.pop('setFun')
-        except KeyError:
-            raise Exception("A Caching test case must have a setFun")
-        try:
-            oldsetUp = attrs.pop('setUp')
-        except KeyError:
-            attrs['setUp'] = setFun
-            attrs['setUp'].__name__ = 'setUp'
-        else:
-            def setUp(self):
-                oldsetUp(self)
-                self.real_cache = cache
-                cache = FakeCache()
-                setFun(self)
-                self.tracked_keys = [key for key in cache.set_keys if self.keyre.search(key)]
-                if not self.tracked_keys:
-                    raise Exception("You're setFun did not set any keys this test isn't testing anything")
-                cache.set_keys = []
+        oldsetUp = attrs.pop('setUp')
+        setFun = attrs.pop('setFun')
+        def setUp(self):
+            oldsetUp(self)
+            self.real_cache = cache
+            cache = FakeCache()
+            setFun(self)
+            self.tracked_keys = [key for key in cache.set_keys if self.keyre.search(key)]
+            if not self.tracked_keys:
+                raise Exception("No keys are being tracked this test isn't testing anything")
+            cache.set_keys = []
+            cache.deleted_keys = []
 
-            attrs['setUp'] = setUp
+        attrs['setUp'] = setUp
 
-        try:
-            oldtearDown = attrs.pop('tearDown')
-        except KeyError:
-            def tearDown(self):
-                cache = self.real_cache
-            attrs['tearDown'] = tearDown
-        else:
-            def tearDown(self):
-                oldtearDown(self)
-                cache = self.real_cache
-            attrs['tearDown'] = tearDown
+        oldtearDown = attrs.pop('tearDown')
+        def tearDown(self):
+            oldtearDown(self)
+            cache = self.real_cache
+        attrs['tearDown'] = tearDown
 
         def check_keys(self, accept_del=True):
             changed_keys = cache.set_keys
@@ -87,8 +73,8 @@ class CachingTestMeta(type):
         nattrs = {}
         for key, val in attrs.items():
             if callable(val) and key[:4] == 'test':
-                testfun = attrs.pop(key) #This appears safe
-                    
+                testfun = attrs.pop(key)
+                # args and kwargs probably aren't necessary
                 def test_cache(self, *args, **kwargs):
                     testfun(self, *args, **kwargs)
                     check_keys(self)
@@ -102,6 +88,19 @@ class CachingTestMeta(type):
 
 
 class CachingTestCase(TestCase):
+    """ CachingTestCase is a specific test case for cache invalidation
+        It should only include tests for cache invaldation.
+        To use it define the following:
+        keyre: a refular expression that describes the key or keys you want to test
+        setFun(self): a function which will set the keys
+        test_foo(self, *args, **kwargs) any number of functions that should reset or delete the tracked keys 
+        setUp and tearDown can be defined as normal
+    """
     __metaclass__ = CachingTestMeta
+
     def setFun(self):
+        pass
+    def setUp(self):
+        pass
+    def tearDown(self):
         pass
