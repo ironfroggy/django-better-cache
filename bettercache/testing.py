@@ -1,5 +1,4 @@
 from django.test import TestCase
-import django.core.cache
 
 class FakeCache(object):
 
@@ -49,7 +48,6 @@ class CachingTestMeta(type):
             oldsetUp(self)
             setFun(self)
             self.tracked_keys = [key for key in self.cache.set_keys if self.keyre.search(key)]
-            # import pdb; pdb.set_trace()
             if not self.tracked_keys:
                 raise Exception("No keys are being tracked this test isn't testing anything")
             self.cache.set_keys = []
