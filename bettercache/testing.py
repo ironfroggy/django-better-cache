@@ -8,7 +8,7 @@ class FakeCache(object):
         self.deleted_keys = []
 
 
-    def get(self, key, val, default=None, **kwargs):
+    def get(self, key, default=None, **kwargs):
         try:
             return self.store[key]
         except KeyError:
@@ -43,8 +43,8 @@ class CachingTestMeta(type):
    def __new__(cls, name, bases, attrs):
         oldsetUp = attrs.pop('setUp')
         setFun = attrs.pop('setFun')
-        attrs['cache'] = FakeCache()
         def setUp(self):
+            self.cache = FakeCache()
             oldsetUp(self)
             setFun(self)
             self.tracked_keys = [key for key in self.cache.set_keys if self.keyre.search(key)]
