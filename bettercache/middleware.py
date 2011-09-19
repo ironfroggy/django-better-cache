@@ -52,6 +52,13 @@ class BetterFetchFromCacheMiddleware(FetchFromCacheMiddleware):
             request._cache_update_cache = False
             return None # Don't bother checking the cache.
 
+        try:
+            if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
+                request._cache_update_cache = False
+                return None
+        except KeyError:
+            pass
+
         # try and get the cached GET response
         cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'GET', cache=self.cache)
         if cache_key is None:
