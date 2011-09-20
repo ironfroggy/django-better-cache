@@ -54,7 +54,7 @@ class BetterFetchFromCacheMiddleware(FetchFromCacheMiddleware):
 
         try:
             if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
-                request._cache_update_cache = False
+                request._cache_update_cache = True
                 return None
         except KeyError:
             pass
