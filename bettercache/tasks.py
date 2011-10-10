@@ -1,6 +1,8 @@
 from celery.task import Task
 
+from django.conf import settings
 from django.core.handlers.wsgi import WSGIRequest
+from django.db import connections
 from bettercache.handlers import AsyncHandler
 from bettercache.utils import CachingMixin
 
@@ -20,6 +22,8 @@ class GeneratePage(Task, CachingMixin):
             return
         handler = AsyncHandler()
         response = handler(request)
+        # TODO: this is medley specific and horrific get rid of it
+        self.set_db('write_master')
         if self.should_cache(request, response):
             self.patch_headers(response)
             self.set_cache(request, response)
@@ -30,3 +34,13 @@ class GeneratePage(Task, CachingMixin):
     def should_rebuild(self, request):
         """ If the page in cache is recent don't bother rebuilding it """
         return True
+
+    def set_db(self, dbname):
+        db = settings.DATABASES[dbname]
+        settings.DATABASES['default'] = db
+        try:
+            conn = connections['default']
+            conn.close()
+            connections._connections.pop('default')
+        except KeyError:
+            pass

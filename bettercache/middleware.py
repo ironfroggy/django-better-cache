@@ -46,12 +46,12 @@ class BetterCacheMiddleware(CachingMixin):
 
     def process_response(self, request, response):
         """ Sets the cache and deals with caching headers if needed
-        """                                                                             
+        """
         if not self.should_cache(request, response):
-            # We don't need to update the cache, just return.                                                        
+            # We don't need to update the cache, just return
             return response 
 
         response = self.patch_headers(response)
         self.set_cache(request, response)
-        
+
         return response
