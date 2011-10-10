@@ -10,7 +10,8 @@ class TestAsyncMiddleware(object):
         if hasattr(request, '_cache_update_cache'):
             return None
         request._cache_update_cache = False
-        response = GeneratePage().run(request)
+        result = GeneratePage.apply_async((strip_wsgi(request),))
+        response = result.get()
         return response
 
 
