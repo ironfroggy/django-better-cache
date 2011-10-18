@@ -21,8 +21,9 @@ class BetterCacheMiddleware(CachingMixin):
         Checks whether the page is already cached and returns the cached
         version if available.
         """
+        celery_task = False
         if getattr(request, '_cache_update_cache', False):
-            return None #This must be the celery task
+            celery_task = True
         if not request.method in ('GET', 'HEAD'):
             request._cache_update_cache = False
             return None # Don't bother checking the cache.
@@ -36,8 +37,11 @@ class BetterCacheMiddleware(CachingMixin):
         if response is None:
             return None # No cache information available, need to rebuild.
 
-        # send off the task if we have to
-        if expired:
+        # TODO: this logic should be in the task not here but it needs the per_request_middleware
+        if celery_task:
+            if self.should_regnerate(response):
+                return None
+        elif expired:
             GeneratePage.apply_async((strip_wsgi(request),))
             self.set_cache(request, response)
         # don't update right since we're serving from cache
