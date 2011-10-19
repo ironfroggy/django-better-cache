@@ -120,7 +120,7 @@ class CachingMixin(object):
         cached_response = cache.get(cache_key, None)
         # if it wasn't found and we are looking for a HEAD, try looking just for that
         if cached_response is None and request.method == 'HEAD':
-            cache_key = get_cache_key(request, self.key_prefix, 'HEAD', cache=cache)
+            cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'HEAD', cache=cache)
             cached_response = cache.get(cache_key, None)
         if cached_response is None:
             return None, None
