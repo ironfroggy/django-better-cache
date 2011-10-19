@@ -39,7 +39,7 @@ class BetterCacheMiddleware(CachingMixin):
 
         # TODO: this logic should be in the task not here but it needs the per_request_middleware
         if celery_task:
-            if self.should_regnerate(response):
+            if self.should_regenerate(response):
                 return None
         elif expired:
             GeneratePage.apply_async((strip_wsgi(request),))
