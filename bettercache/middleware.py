@@ -21,9 +21,7 @@ class BetterCacheMiddleware(CachingMixin):
         Checks whether the page is already cached and returns the cached
         version if available.
         """
-        celery_task = False
-        if getattr(request, '_cache_update_cache', False):
-            celery_task = True
+        celery_task = getattr(request, '_cache_update_cache', False)
         if not request.method in ('GET', 'HEAD'):
             request._cache_update_cache = False
             return None # Don't bother checking the cache.
