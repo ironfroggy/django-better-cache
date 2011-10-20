@@ -78,7 +78,7 @@ class CachingMixin(object):
     def should_regenerate(self, response):
         """ Check if this page was originally generated less than LOCAL_POSTCHECK seconds ago """
         if response.has_header('Last-Modified'):
-            if parse_http_date(response['Last-Modified']) < (time.time() + (settings.BETTERCACHE_LOCAL_POSTCHECK * 1000)):
+            if parse_http_date(response['Last-Modified']) < (time.time() + settings.BETTERCACHE_LOCAL_POSTCHECK):
                 return False
         return True
 
