@@ -78,9 +78,9 @@ class CachingMixin(object):
     def should_regenerate(self, response):
         """ Check if this page was originally generated less than LOCAL_POSTCHECK seconds ago """
         if response.has_header('Last-Modified'):
-            if parse_http_date(response['Last-Modified']) > (time.time() + settings.BETTERCACHE_LOCAL_POSTCHECK):
-                return False
-        return True
+            last_modified = parse_http_date(response['Last-Modified'])
+            next_regen = last_modified + settings.BETTERCACHE_LOCAL_POSTCHECK
+            return time.time() > next_regen
 
     def has_uncacheable_headers(self, response):
         """ Should this response be cached based on it's headers
