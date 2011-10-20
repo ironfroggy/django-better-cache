@@ -4,8 +4,9 @@ from unittest2 import TestCase
 
 import mock
 
+from django.conf import settings
 from django.http import HttpResponse, HttpRequest
-from django.utils.http import http_date
+from django.utils.http import http_date, parse_http_date
 
 from bettercache.utils import get_header_dict, set_header_dict, CachingMixin
 
@@ -169,3 +170,13 @@ class TestCachingMixin(TestCase):
         req.META['HTTP_CACHE_CONTROL'] = 'max-age=0, no-cache'
         self.assertTrue(cm.should_bypass_cache(req))
 
+    @mock.patch('bettercache.utils.time')
+    def test_should_regenerate(self, mocktime):
+        now = 1319128343
+        mocktime.time.return_value = now
+        cm = CachingMixin()
+        response = HttpResponse()
+        response['Last-Modified'] = http_date(now)
+        self.assertFalse(cm.should_regenerate(response))
+        response['Last-Modified'] = http_date(now - (100 + settings.BETTERCACHE_LOCAL_POSTCHECK))
+        self.assertTrue(cm.should_regenerate(response))
