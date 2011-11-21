@@ -1,3 +1,5 @@
+import urllib2, time
+
 from django.http import HttpResponse
 from bettercache.utils import CachingMixin
 from bettercache.tasks import GeneratePage
@@ -18,10 +20,12 @@ class BetterView(CachingMixin):
         if response is None:
             response = self.proxy(request)
 
-        return HttpResponse('OH YEAH')
+        return response #HttpResponse('OH YEAH')
 
     def proxy(self, request):
-        return None
+        response = urllib2.urlopen('http://www.test.clarkhoward.com',str(time.time))
+        hr = HttpResponse(response.read())
+        return hr
 
 
 #TODO: properly implement a class based view
