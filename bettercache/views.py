@@ -1,4 +1,6 @@
+from django.http import HttpResponse
 from bettercache.utils import CachingMixin
+from bettercache.tasks import GeneratePage
 
 
 class BetterView(CachingMixin):
@@ -16,4 +18,12 @@ class BetterView(CachingMixin):
         if response is None:
             response = self.proxy(request)
 
-        return response
+        return HttpResponse('OH YEAH')
+
+    def proxy(self, request):
+        return None
+
+
+#TODO: properly implement a class based view
+BV = BetterView()
+cache_view = BV.get
