@@ -106,7 +106,8 @@ class CacheNode(template.Node):
                 context.push()
                 try:
                     for def_name, def_value in defaults.items():
-                        context.setdefault(def_name, def_value)
+                        if def_name not in context:
+                            context[def_name] = template.Variable(def_value).resolve(context)
                     value = self.nodelist.render(context)
                 finally:
                     context.pop()
