@@ -9,6 +9,10 @@ class A(CacheModel):
 class B(CacheModel):
     x = CacheField(name='y')
 
+class C(CacheModel):
+    name = CacheKey()
+    value = CacheField()
+
 
 class ModelTest(unittest.TestCase):
 
@@ -23,3 +27,11 @@ class ModelTest(unittest.TestCase):
     def test_unknown_field(self):
         self.assertRaises(AttributeError, B, z=1)
 
+    def test_keys(self):
+        keys = C(name='T', value=42).keys()
+        self.assertEqual(dict(keys), {'name': 'T'})
+
+    def test_serialize(self):
+        c = C(name='T', value=42)
+        s = c.serialize()
+        c2 = C.deserialize(s)

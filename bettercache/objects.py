@@ -47,6 +47,21 @@ class CacheModel(object):
                 keys[k] = getattr(self, k)
         return keys
 
+    def serialize(self):
+        keys = self.keys()
+        serdata = {}
+        for fieldname, value in self._data.items():
+            if fieldname not in keys:
+                serdata[fieldname] = getattr(type(self), fieldname).python_to_cache(value)
+        return json.dumps(serdata)
+
+    @classmethod
+    def deserialize(cls, string):
+        data = json.loads(string)
+        for fieldname, value in data.items():
+            data[fieldname] = getattr(cls, fieldname).cache_to_python(value)
+        return cls(**data)
+
 
 _next_order_value = 0
 def _next_order():
