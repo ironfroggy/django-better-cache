@@ -51,7 +51,7 @@
                     {% endcache %}
                 </div>
                 <div class=cache>
-                    {% cache 500 "test-inner-3" local foo:"0" %}
+                    {% cache 500 "test-inner-3" local foo="0" %}
                     <h3>Cache on foo, don't add to parent</h3>
                         x = {{ x }}<br />
                         y = {{ y }}<br />

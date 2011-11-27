@@ -48,4 +48,4 @@ affect only this cache fragment, not its parent.
 
 ### Plans
 
- - on-demand invalidation of fragments based on model keys
+ - on-demand invalidation of fragments based on mappings through an ORM-like interface
