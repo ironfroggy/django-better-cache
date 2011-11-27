@@ -64,10 +64,12 @@ class CacheNode(template.Node):
         args = list(self.key_stack) + [list(extra_args)]
         all_stack_vary_on = itertools.chain(*args)
         vary_values = []
+        defaults = {}
 
         for vary_var in all_stack_vary_on:
             try:
                 vary_var, default = vary_var.split('=')
+                defaults[vary_var] = default
             except ValueError:
                 pass
             try:
@@ -84,7 +86,7 @@ class CacheNode(template.Node):
 
         cache_key = 'bettercache.%s.%s' % (fragment_name, args.hexdigest())
 
-        return cache_key
+        return cache_key, defaults
 
     def render(self, context):
         expire_time = int(self.expire_time_var.resolve(context))
@@ -92,16 +94,22 @@ class CacheNode(template.Node):
         self.key_stack.append(self.vary_on)
         self.fragment_stack.append((self.fragment_name, self))
         try:
-            cache_key = self.make_cache_key(context)
+            cache_key, defaults = self.make_cache_key(context)
             
             extra_keys = cache.get(cache_key + '::extra_keys')
             if extra_keys is not None:
-                cache_key = self.make_cache_key(context, extra_keys)
+                cache_key, defaults = self.make_cache_key(context, extra_keys)
 
             value = cache.get(cache_key)
 
             if value is None:
-                value = self.nodelist.render(context)
+                context.push()
+                try:
+                    for def_name, def_value in defaults.items():
+                        context.setdefault(def_name, def_value)
+                    value = self.nodelist.render(context)
+                finally:
+                    context.pop()
                 cache.set(cache_key, value, expire_time)
 
                 # Did we get new keys from any child caches?
