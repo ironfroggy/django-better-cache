@@ -23,9 +23,19 @@ class BetterView(CachingMixin):
         return response #HttpResponse('OH YEAH')
 
     def proxy(self, request):
-        response = urllib2.urlopen('http://www.test.clarkhoward.com',str(time.time))
+        url = request.build_absolute_uri()
+        #TODO: Don't do this
+        url = url.replace('local.www', 'www.test').replace(':8000','')
+        print url
+        response = urllib2.urlopen(url)
         hr = HttpResponse(response.read())
         return hr
+
+    def get_url(self, request):
+        print request.build_absolute_uri()
+        import pdb; pdb.set_trace()
+        return ''
+
 
 
 #TODO: properly implement a class based view
