@@ -3,7 +3,7 @@ import urllib2, time
 from django.http import HttpResponse
 from bettercache.utils import CachingMixin
 from bettercache.tasks import GeneratePage
-
+from bettercache.proxy import proxy
 
 class BetterView(CachingMixin):
     def get(self, request):
@@ -18,7 +18,7 @@ class BetterView(CachingMixin):
 
         # if response is still none we have to proxy
         if response is None:
-            response = self.proxy(request)
+            response = proxy(request)
 
         return response #HttpResponse('OH YEAH')
 
