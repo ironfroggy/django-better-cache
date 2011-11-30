@@ -7,6 +7,8 @@ import asyncore, socket
 from django.http import HttpResponse
 from django.conf import settings
 
+HOST = 'localhost'
+
 def index(request):
     #print request
     if request.META['QUERY_STRING']:
@@ -25,7 +27,7 @@ def index(request):
     #print data
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(request.META['HTTP_HOST'])
+    sock.connect(HOST)
 
     sock.sendall(data)
     output = []
@@ -61,7 +63,6 @@ def header_name(name):
     words = name[5:].split('_')
     for i in range(len(words)):
         words[i] = words[i][0].upper() + words[i][1:].lower()
-        
     result = '-'.join(words) + ':'
     return result
 
