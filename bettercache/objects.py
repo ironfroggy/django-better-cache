@@ -9,6 +9,8 @@ or invalidating entries easily.
 import json
 import collections
 
+from django.core.cache import cache as _cache
+
 
 class CacheModel(object):
 
@@ -44,15 +46,21 @@ class CacheModel(object):
         ]
 
         for k, v in sorted(items, key=order_key):
-                keys[k] = getattr(self, k)
+            keys[k] = getattr(self, k)
         return keys
+
+    @classmethod
+    def _key(self, keys):
+        return '/'.join('='.join((k, v)) for (k, v) in keys.items())
+
+    def key(self):
+        return self._key(self.keys())
 
     def serialize(self):
         keys = self.keys()
         serdata = {}
         for fieldname, value in self._data.items():
-            if fieldname not in keys:
-                serdata[fieldname] = getattr(type(self), fieldname).python_to_cache(value)
+            serdata[fieldname] = getattr(type(self), fieldname).python_to_cache(value)
         return json.dumps(serdata)
 
     @classmethod
@@ -61,6 +69,17 @@ class CacheModel(object):
         for fieldname, value in data.items():
             data[fieldname] = getattr(cls, fieldname).cache_to_python(value)
         return cls(**data)
+
+    def save(self):
+        s = self.serialize()
+        key = self._key(self.keys())
+        _cache.set(key, s)
+
+    @classmethod
+    def get(cls, **kwargs):
+        k = cls(**kwargs).key()
+        data = _cache.get(k)
+        return cls.deserialize(data)
 
 
 _next_order_value = 0
@@ -78,10 +97,10 @@ class CacheField(object):
         if obj is None:
             return self
         else:
-            return self.cache_to_python(obj._data[self.name])
+            return obj._data[self.name]
 
     def __set__(self, obj, value):
-        obj._data[self.name] = self.python_to_cache(value)
+        obj._data[self.name] = value
 
     def python_to_cache(self, value):
         return json.dumps(value)

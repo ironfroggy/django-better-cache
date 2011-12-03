@@ -35,3 +35,11 @@ class ModelTest(unittest.TestCase):
         c = C(name='T', value=42)
         s = c.serialize()
         c2 = C.deserialize(s)
+
+    def test_save_and_get(self):
+        c = C(name='T', value=42)
+        c.save()
+        c2 = C.get(name='T')
+        self.assertEqual(c2.value, 42)
+        self.assertEqual(c2.name, 'T')
+
