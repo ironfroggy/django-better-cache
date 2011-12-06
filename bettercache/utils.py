@@ -44,7 +44,7 @@ class CachingMixin(object):
         response['Last-Modified'] = http_date()
         return response
 
- 
+
     def session_accessed(self, request):
         """ from django.middleware.cache.UpdateCacheMiddleware._session_accesed 
             I don't know what would cause sessions.acccessed to be there so I'm just copypasting """

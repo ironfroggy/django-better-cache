@@ -1,15 +1,15 @@
 # Create your views here.
 
-#import socket
+import socket
 import time
-import asyncore, socket
+#import asyncore, socket
 
 from django.http import HttpResponse
 from django.conf import settings
 
-HOST = 'localhost'
+HOST = (settings.BETTERCACHE_ORIGIN_HOST, settings.BETTERCACHE_ORIGIN_PORT)
 
-def index(request):
+def proxy(request):
     #print request
     if request.META['QUERY_STRING']:
         querystring = request.META['PATH_INFO'] + '?' + request.META['QUERY_STRING']
