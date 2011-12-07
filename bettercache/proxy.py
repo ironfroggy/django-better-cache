@@ -1,61 +1,41 @@
 # Create your views here.
-
-import socket
-import time
-#import asyncore, socket
+from httplib2 import Http
 
 from django.http import HttpResponse
 from django.conf import settings
+from django.core.servers.basehttp import is_hop_by_hop
 
 HOST = (settings.BETTERCACHE_ORIGIN_HOST, settings.BETTERCACHE_ORIGIN_PORT)
 
+
+def clean_local(hostname):
+    return hostname.replace('local.www','www.test').replace(':8000','')
+
+
 def proxy(request):
-    #print request
-    if request.META['QUERY_STRING']:
-        querystring = request.META['PATH_INFO'] + '?' + request.META['QUERY_STRING']
-    else:
-        querystring = request.META['PATH_INFO']
-    server_protocol = request.META['SERVER_PROTOCOL']
 
-    data = []
-    data.append(' '.join([request.method, querystring, server_protocol]))#
-    for a, b in request.environ.iteritems():
-        if a.startswith('HTTP_'):
-            a = header_name(a)
-            data.append('%s %s'%(a,b))
-    data = '\r\n'.join(data)+'\r\n\r\n'
-    #print data
+    uri = request.build_absolute_uri()
+    uri = clean_local(uri)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(HOST)
+    headers = {}
+    for name, val in request.environ.iteritems():
+        if name.startswith('HTTP_'):
+            name = header_name(name)
+            if name == "Host":
+                val = clean_local(val)
+            headers[name] = val
 
-    sock.sendall(data)
-    output = []
-    while True:
-        #print 'doing'
-        buf = sock.recv(1024)
-        if buf:
-            output.append(buf)
-        else:
-            break
-    incoming = ''.join(output)
-    #print incoming
+    # TODO: try/except
+    print uri
+    print headers
+    info, content = Http().request(uri, 'GET', headers=headers)
+    response = HttpResponse(content, status=info.pop('status'))
 
-    if incoming.startswith('HTTP/'):
-        #print incoming[:incoming.index('\r\n')]
-        status_line = incoming[:incoming.index('\r\n')].split()
-        server_protocol, status_code = status_line[0],status_line[1]
-        headers = incoming[incoming.index('\r\n')+2:incoming.index('\r\n\r\n')]
-        content = incoming[incoming.index('\r\n\r\n')+4:]
+    for name, val in info.items():
+        if not is_hop_by_hop(name):
+            response[name] = val
 
-        response = HttpResponse(content, status=int(status_code))
-        for i in headers.split('\r\n'):
-            print i[:i.index(':')], i[i.index(':')+2:]
-            response[i[:i.index(':')]] = i[i.index(':')+2:]
-
-        return response
-    else:
-        return HttpResponse2(incoming)
+    return response
 
 
 def header_name(name):
@@ -63,32 +43,5 @@ def header_name(name):
     words = name[5:].split('_')
     for i in range(len(words)):
         words[i] = words[i][0].upper() + words[i][1:].lower()
-    result = '-'.join(words) + ':'
+    result = '-'.join(words)
     return result
-
-
-class HttpResponse2(object):
-    status_code = 200
-
-    def __init__(self, content=''):
-        if not isinstance(content, basestring) and hasattr(content, '__iter__'):
-            self._container = content
-            self._is_string = False
-        else:
-            self._container = [content]
-            self._is_string = True
-        self.cookies = {}#SimpleCookie()
-        self._headers = {}#{'content-type': ('Content-Type', content_type)}
-
-    def items(self):
-        return self._headers.values()
-
-    def __iter__(self):
-        self._iterator = iter(self._container)
-        return self
-
-    def next(self):
-        chunk = self._iterator.next()
-        if isinstance(chunk, unicode):
-            chunk = chunk.encode(self._charset)
-        return str(chunk)

@@ -20,6 +20,7 @@ class BetterView(CachingMixin):
         if response is None:
             response = proxy(request)
 
+
         return response #HttpResponse('OH YEAH')
 
     def proxy(self, request):
