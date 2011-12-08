@@ -19,7 +19,9 @@ class BetterView(CachingMixin):
         # if response is still none we have to proxy
         if response is None:
             response = proxy(request)
-
+            
+            response['X-Bettercache-Proxy'] = 'true'
+        response['X-Bettercache-time'] = str(time.time())
 
         return response #HttpResponse('OH YEAH')
 

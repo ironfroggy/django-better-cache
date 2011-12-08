@@ -5,7 +5,9 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.core.servers.basehttp import is_hop_by_hop
 
-HOST = (settings.BETTERCACHE_ORIGIN_HOST, settings.BETTERCACHE_ORIGIN_PORT)
+HOST = settings.BETTERCACHE_ORIGIN_HOST
+if getattr(settings, 'BETTERCACHE_ORIGIN_PORT', None):
+    HOST += ":" + str(settings.BETTERCACHE_ORIGIN_PORT)
 
 
 def clean_local(hostname):
@@ -14,15 +16,19 @@ def clean_local(hostname):
 
 def proxy(request):
 
-    uri = request.build_absolute_uri()
-    uri = clean_local(uri)
+    # TODO: don't hardcode http
+    uri = "http://" + HOST + request.META['PATH_INFO']
+    if request.META['QUERY_STRING']:
+        uri += '?' + request.META['QUERY_STRING']
 
     headers = {}
+    hosttt = ''
     for name, val in request.environ.iteritems():
         if name.startswith('HTTP_'):
             name = header_name(name)
             if name == "Host":
                 val = clean_local(val)
+                hosttt = val
             headers[name] = val
 
     # TODO: try/except
@@ -31,6 +37,7 @@ def proxy(request):
     info, content = Http().request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 
+    response['X-Bettercache-Host'] = request.META['HTTP_HOST']
     for name, val in info.items():
         if not is_hop_by_hop(name):
             response[name] = val
