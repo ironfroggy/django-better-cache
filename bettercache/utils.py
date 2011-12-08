@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.cache import cache
-from django.utils.cache import get_cache_key, learn_cache_key, cc_delim_re
+from django.utils.cache import cc_delim_re
 from django.utils.encoding import smart_str
 from django.utils.http import http_date, parse_http_date
 
@@ -101,8 +101,7 @@ class CachingMixin(object):
 
     def set_cache(self, request, response):
         """ caches the response """
-        # TODO: does this do the right thing with vary headers
-        cache_key = learn_cache_key(request, response, settings.BETTERCACHE_LOCAL_MAXAGE, settings.CACHE_MIDDLEWARE_KEY_PREFIX)
+        cache_key = self.cache_key(request)
         #presumably this is to deal with requests with attr functions that won't pickle
         if hasattr(response, 'render') and callable(response.render):
             response.add_post_render_callback(lambda r: cache.set(cache_key, (r, datetime.now(),), settings.BETTERCACHE_LOCAL_MAXAGE))
@@ -114,19 +113,23 @@ class CachingMixin(object):
             If there is no cached response return (None, None,)
         """
         # try and get the cached GET response
-        cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'GET', cache=cache)
-        if cache_key is None:
-            return (None, None) # No cache information available, need to rebuild.
+        cache_key = self.cache_key(request)
         cached_response = cache.get(cache_key, None)
-        # if it wasn't found and we are looking for a HEAD, try looking just for that
+        # if it wasn't found and we are looking for a HEAD, try looking for a corresponding GET
         if cached_response is None and request.method == 'HEAD':
-            cache_key = get_cache_key(request, settings.CACHE_MIDDLEWARE_KEY_PREFIX, 'HEAD', cache=cache)
+            cache_key = self.cache_key(request, 'GET')
             cached_response = cache.get(cache_key, None)
         if cached_response is None:
             return None, None
         if cached_response[1] < datetime.now() - timedelta(seconds=settings.BETTERCACHE_LOCAL_POSTCHECK):
             return cached_response[0], True
         return cached_response[0], False
+
+    def cache_key(self, request, method=None):
+        """ the cache key is the absolute uri and the request method """
+        if method is None:
+            method = request.method
+        return "page_cache:%s:%s" %(request.get_absolute_uri, method)
 
 
 def get_header_dict(response, header):
