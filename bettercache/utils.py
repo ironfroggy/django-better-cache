@@ -8,6 +8,9 @@ from django.utils.cache import cc_delim_re
 from django.utils.encoding import smart_str
 from django.utils.http import http_date, parse_http_date
 
+import logging
+logger = logging.getLogger()
+
 CACHEABLE_STATUS = [200, 203, 300, 301, 404, 410]
 
 class CachingMixin(object):
@@ -114,6 +117,7 @@ class CachingMixin(object):
         """
         # try and get the cached GET response
         cache_key = self.cache_key(request)
+        logger.error(cache_key)
         cached_response = cache.get(cache_key, None)
         # if it wasn't found and we are looking for a HEAD, try looking for a corresponding GET
         if cached_response is None and request.method == 'HEAD':
@@ -129,7 +133,7 @@ class CachingMixin(object):
         """ the cache key is the absolute uri and the request method """
         if method is None:
             method = request.method
-        return "page_cache:%s:%s" %(request.build_absolute_uri, method)
+        return "page_cache:%s:%s" %(request.build_absolute_uri(), method)
 
 
 def get_header_dict(response, header):
