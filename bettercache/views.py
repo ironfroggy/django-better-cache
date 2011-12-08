@@ -5,8 +5,12 @@ from bettercache.utils import CachingMixin
 from bettercache.tasks import GeneratePage
 from bettercache.proxy import proxy
 
+import logging
+logger = logging.getLogger()
+
 class BetterView(CachingMixin):
     def get(self, request):
+        logger.error("SDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
         response = None
         #should this bypass
         if not self.should_bypass_cache(request):
@@ -19,7 +23,7 @@ class BetterView(CachingMixin):
         # if response is still none we have to proxy
         if response is None:
             response = proxy(request)
-            
+
             response['X-Bettercache-Proxy'] = 'true'
         response['X-Bettercache-time'] = str(time.time())
 
