@@ -1,7 +1,7 @@
 import urllib2, time
 
 from django.http import HttpResponse
-from bettercache.utils import CachingMixin
+from bettercache.utils import CachingMixin, strip_wsgi
 from bettercache.tasks import GeneratePage
 from bettercache.proxy import proxy
 
@@ -23,6 +23,7 @@ class BetterView(CachingMixin):
         # if response is still none we have to proxy
         if response is None:
             response = proxy(request)
+            #self.set_cache(request, response)
 
             response['X-Bettercache-Proxy'] = 'true'
         response['X-Bettercache-time'] = str(time.time())
