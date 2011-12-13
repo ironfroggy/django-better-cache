@@ -1,17 +1,17 @@
-from bettercache.objects import CacheModel, CacheField, CacheKey
+from bettercache.objects import CacheModel, Field, Key
 import unittest
 
 
 class A(CacheModel):
-    a = CacheKey()
-    b = CacheKey()
+    a = Key()
+    b = Key()
 
 class B(CacheModel):
-    x = CacheField(name='y')
+    x = Field(name='y')
 
 class C(CacheModel):
-    name = CacheKey()
-    value = CacheField()
+    name = Key()
+    value = Field()
 
 
 class ModelTest(unittest.TestCase):

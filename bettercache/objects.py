@@ -17,7 +17,7 @@ class CacheModel(object):
     def __init__(self, *args, **kwargs):
         items = [(k, v) for (k, v)
             in vars(type(self)).items()
-            if isinstance(v, CacheField)
+            if isinstance(v, Field)
         ]
         known_fields = set()
         for name, field in items:
@@ -42,7 +42,7 @@ class CacheModel(object):
         
         items = [(k, v) for (k, v)
             in vars(type(self)).items()
-            if isinstance(v, CacheKey)
+            if isinstance(v, Key)
         ]
 
         for k, v in sorted(items, key=order_key):
@@ -88,7 +88,7 @@ def _next_order():
     _next_order_value += 1
     return _next_order_value
 
-class CacheField(object):
+class Field(object):
     def __init__(self, name=None):
         self.order = _next_order()
         self.name = name
@@ -109,6 +109,6 @@ class CacheField(object):
         return json.loads(value)
 
 
-class CacheKey(CacheField):
+class Key(Field):
     pass
 
