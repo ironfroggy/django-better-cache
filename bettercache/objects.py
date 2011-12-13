@@ -87,6 +87,10 @@ class CacheModel(object):
         data = _cache.get(k)
         return cls.deserialize(data)
 
+    def delete(self):
+        key = self._key(self._all_keys())
+        _cache.delete(key)
+
 
 _next_order_value = 0
 def _next_order():
