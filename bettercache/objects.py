@@ -32,6 +32,12 @@ class CacheModel(object):
                 setattr(self, name, value)
             else:
                 raise AttributeError("Unknown field '{0}' given.".format(name))
+
+    def _all_keys(self):
+        keys = self.keys()
+        keys['$MODULE'] = type(self).__module__
+        keys['$CLASS'] = type(self).__name__
+        return keys
         
     def keys(self):
         keys = collections.OrderedDict()
@@ -54,10 +60,10 @@ class CacheModel(object):
         return '/'.join('='.join((k, v)) for (k, v) in keys.items())
 
     def key(self):
-        return self._key(self.keys())
+        return self._key(self._all_keys())
 
     def serialize(self):
-        keys = self.keys()
+        keys = self._all_keys()
         serdata = {}
         for fieldname, value in self._data.items():
             serdata[fieldname] = getattr(type(self), fieldname).python_to_cache(value)
@@ -72,7 +78,7 @@ class CacheModel(object):
 
     def save(self):
         s = self.serialize()
-        key = self._key(self.keys())
+        key = self._key(self._all_keys())
         _cache.set(key, s)
 
     @classmethod

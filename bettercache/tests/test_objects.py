@@ -13,6 +13,10 @@ class C(CacheModel):
     name = Key()
     value = Field()
 
+class D(CacheModel):
+    a = Key()
+    b = Key()
+
 
 class ModelTest(unittest.TestCase):
 
@@ -42,4 +46,11 @@ class ModelTest(unittest.TestCase):
         c2 = C.get(name='T')
         self.assertEqual(c2.value, 42)
         self.assertEqual(c2.name, 'T')
+
+    def test_same_keys(self):
+        a = A(a=1, b=2)
+        d = D(a=1, b=2)
+
+        self.assertEqual(a.keys(), d.keys())
+        self.assertNotEqual(a._all_keys(), d._all_keys())
 
