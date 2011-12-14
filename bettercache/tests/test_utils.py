@@ -131,16 +131,15 @@ class TestCachingMixin(TestCase):
         self.assertTrue(cm.has_uncacheable_headers(resp))
 
     @mock.patch('bettercache.utils.settings')
-    @mock.patch('bettercache.utils.get_cache_key')
     @mock.patch('bettercache.utils.cache', new=fake_cache)
-    def test_get_cache(self, gck, settings):
+    def test_get_cache(self, settings):
         fake_cache.clear()
         self.set_settings(settings)
-        gck.return_value = None
         req = HttpRequest()
         cm = CachingMixin()
+        cm.cache_key = lambda x: 'notcachedyet'
         self.assertEquals(cm.get_cache(req), (None, None))
-        gck.return_value = 'test_key'
+        cm.cache_key = lambda x: 'test_key'
         self.assertEquals(cm.get_cache(req), (None, None))
         fake_cache.set('test_key', ('resp', datetime.now() - timedelta(days=1))) 
         self.assertEquals(cm.get_cache(req), ('resp', True))
@@ -148,13 +147,12 @@ class TestCachingMixin(TestCase):
         self.assertEquals(cm.get_cache(req), ('resp', False))
 
     @mock.patch('bettercache.utils.cache')
-    @mock.patch('bettercache.utils.learn_cache_key')
     @mock.patch('bettercache.utils.settings')
-    def test_set_cache(self, settings, lck, cache):
-        lck.return_value = 'test'
+    def test_set_cache(self, settings,  cache):
         resp = mock.Mock()
         req = mock.Mock()
         cm = CachingMixin()
+        cm.cache_key = lambda x: 'test'
         resp.render = False
         cm.set_cache(req, resp)
         self.assertTrue(cache.set.called)

@@ -10,7 +10,6 @@ logger = logging.getLogger()
 
 class BetterView(CachingMixin):
     def get(self, request):
-        logger.error("SDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
         response = None
         #should this bypass
         if not self.should_bypass_cache(request):
@@ -22,13 +21,16 @@ class BetterView(CachingMixin):
 
         # if response is still none we have to proxy
         if response is None:
+            logger.info('request %s proxied' %request.build_absolute_uri)
             response = proxy(request)
             #self.set_cache(request, response)
-
             response['X-Bettercache-Proxy'] = 'true'
+        else:
+            logger.info('request %s from cache' %request.build_absolute_uri)
+
         response['X-Bettercache-time'] = str(time.time())
 
-        return response #HttpResponse('OH YEAH')
+        return response
 
     def proxy(self, request):
         url = request.build_absolute_uri()

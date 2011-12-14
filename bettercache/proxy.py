@@ -5,7 +5,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.core.servers.basehttp import is_hop_by_hop
 
-HOST = settings.BETTERCACHE_ORIGIN_HOST
+HOST = getattr(settings, 'BETTERCACHE_ORIGIN_HOST', 'localhost')
+
 if getattr(settings, 'BETTERCACHE_ORIGIN_PORT', None):
     HOST += ":" + str(settings.BETTERCACHE_ORIGIN_PORT)
 
