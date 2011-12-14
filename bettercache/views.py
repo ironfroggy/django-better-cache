@@ -13,8 +13,7 @@ class BetterView(CachingMixin):
             response, expired = self.get_cache(request)
             # send off the celery task if it's expired
             if expired:
-                GeneratePage.apply_async((strip_wsgi(request),))
-                self.set_cache(request, response)
+                self.send_task(request, response)
 
         # if response is still none we have to proxy
         if response is None:

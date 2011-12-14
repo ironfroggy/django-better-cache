@@ -135,6 +135,16 @@ class CachingMixin(object):
             method = request.method
         return "page_cache:%s:%s" %(request.build_absolute_uri(), method)
 
+    def send_task(self, request, response):
+        ''' send off a celery task for the current page and recache '''
+        # TODO is this too messy?
+        from bettercache.tasks import GeneratePage
+        try:
+            GeneratePage.apply_async((strip_wsgi(request),))
+        except:
+           pass
+        self.set_cache(request, response)
+
 
 def get_header_dict(response, header):
     """ returns a dictionary of the cache control headers
