@@ -33,8 +33,6 @@ def proxy(request):
             headers[name] = val
 
     # TODO: try/except
-    print uri
-    print headers
     info, content = Http().request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 

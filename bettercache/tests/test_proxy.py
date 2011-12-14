@@ -24,10 +24,13 @@ class TestProxy(TestCase):
                         )
         req.META = req.environ
         mockhttp = mock.Mock()
-        mockhttp.request.return_value = ({'status':'200'},'bar')
+        mockhttp.request.return_value = ({'status':'200','Cache-Control':'no-cache', 'Keep-Alive': '10', },'bar')
         Http.return_value = mockhttp
         resp = proxy(req)
         req_args, req_kwargs =  mockhttp.request.call_args
         self.assertEqual(req_args, ('http://localhost/foo/bar?foo=bar&bar=foo', 'GET'))
         headers = {'Host': 'example.com', 'X-Foo': 'foobar', 'Cache-Control': 'cache-headers'}
         self.assertEqual(req_kwargs['headers'], headers)
+        self.assertEqual(resp['Cache-Control'], 'no-cache')
+        self.assertEqual(resp.content, 'bar')
+        self.assertFalse(hasattr(resp, 'Keep-Alive'))
