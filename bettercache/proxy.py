@@ -23,13 +23,11 @@ def proxy(request):
         uri += '?' + request.META['QUERY_STRING']
 
     headers = {}
-    hosttt = ''
     for name, val in request.environ.iteritems():
         if name.startswith('HTTP_'):
             name = header_name(name)
             if name == "Host":
                 val = clean_local(val)
-                hosttt = val
             headers[name] = val
 
     # TODO: try/except

@@ -117,7 +117,6 @@ class CachingMixin(object):
         """
         # try and get the cached GET response
         cache_key = self.cache_key(request)
-        logger.error(cache_key)
         cached_response = cache.get(cache_key, None)
         # if it wasn't found and we are looking for a HEAD, try looking for a corresponding GET
         if cached_response is None and request.method == 'HEAD':
