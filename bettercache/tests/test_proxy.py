@@ -10,3 +10,24 @@ class TestHeaderName(TestCase):
 
     def testheadername(self):
         self.assertEqual(header_name('HTTP_CACHE_CONTROL'), 'Cache-Control')
+
+class TestProxy(TestCase):
+
+    @mock.patch('bettercache.proxy.Http')
+    def testproxy(self, Http):
+        req = mock.Mock()
+        req.environ = dict( HTTP_CACHE_CONTROL='cache-headers',
+                        HTTP_X_FOO='foobar',
+                        PATH_INFO='/foo/bar',
+                        QUERY_STRING='foo=bar&bar=foo',
+                        HTTP_HOST='example.com',
+                        )
+        req.META = req.environ
+        mockhttp = mock.Mock()
+        mockhttp.request.return_value = ({'status':'200'},'bar')
+        Http.return_value = mockhttp
+        resp = proxy(req)
+        req_args, req_kwargs =  mockhttp.request.call_args
+        self.assertEqual(req_args, ('http://localhost/foo/bar?foo=bar&bar=foo', 'GET'))
+        headers = {'Host': 'example.com', 'X-Foo': 'foobar', 'Cache-Control': 'cache-headers'}
+        self.assertEqual(req_kwargs['headers'], headers)
