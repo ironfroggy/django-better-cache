@@ -19,22 +19,23 @@ class TestView(TestCase):
         self.view.get(self.request)
         self.assertTrue(proxy.called)
 
-    @mock.patch('bettercache.views.GeneratePage')
     @mock.patch('bettercache.views.strip_wsgi')
     @mock.patch('bettercache.views.proxy')
-    def test_notexpired(self, proxy, strip_wsgi, GP):
+    def test_notexpired(self, proxy, strip_wsgi):
         ''' make sure we don't send off a task if it's not expired '''
         self.view.get_cache = lambda x: ('_', False, )
+        self.view.send_task = mock.Mock()
         self.view.get(self.request)
-        self.assertFalse(GP.apply_async.called)
+        self.assertFalse(self.view.send_task.called)
         self.assertFalse(proxy.called)
 
-    @mock.patch('bettercache.views.GeneratePage')
     @mock.patch('bettercache.views.strip_wsgi')
     @mock.patch('bettercache.views.proxy')
-    def test_expired(self, proxy, strip_wsgi, GP):
+    def test_expired(self, proxy, strip_wsgi):
         ''' make sure thats when it's expired the task is sent '''
+        self.view.should_bypass_cache = lambda x: False
+        self.view.send_task = mock.Mock()
         self.view.get_cache = lambda x: ('_', True, )
         self.view.get(self.request)
-        self.assertTrue(GP.apply_async.called)
+        self.assertTrue(self.view.send_task.called)
         self.assertFalse(proxy.called)

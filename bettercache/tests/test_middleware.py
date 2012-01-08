@@ -5,8 +5,7 @@ from bettercache.middleware import BetterCacheMiddleware
 
 class TestMiddleware(TestCase):
 
-    @mock.patch('bettercache.middleware.GeneratePage')
-    def test_req(self, GM):
+    def test_req(self):
         request = mock.Mock()
         request.method = 'POST'
         request._cache_update_cache = False
