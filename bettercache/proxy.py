@@ -31,7 +31,9 @@ def proxy(request):
             headers[name] = val
 
     # TODO: try/except
-    info, content = Http().request(uri, 'GET', headers=headers)
+    http = Http()
+    http.follow_redirects = False
+    info, content = http.request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 
     response['X-Bettercache-Host'] = request.META['HTTP_HOST']
