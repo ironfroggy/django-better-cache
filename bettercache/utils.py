@@ -108,6 +108,8 @@ class CachingMixin(object):
         if renderable and hasattr(response, 'render') and callable(response.render):
             response.add_post_render_callback(lambda r: cache.set(cache_key, (r, time.time(),), settings.BETTERCACHE_LOCAL_MAXAGE))
         else:
+            if hasattr(response, 'render') and callable(response.render):
+                del response.render
             cache.set(cache_key, (response, time.time(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
 
     def get_cache(self, request):
