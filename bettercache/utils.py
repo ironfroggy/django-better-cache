@@ -101,11 +101,11 @@ class CachingMixin(object):
                 return True
         return False
 
-    def set_cache(self, request, response):
+    def set_cache(self, request, response, renderable=True):
         """ caches the response """
         cache_key = self.cache_key(request)
         #presumably this is to deal with requests with attr functions that won't pickle
-        if hasattr(response, 'render') and callable(response.render):
+        if renderable and hasattr(response, 'render') and callable(response.render):
             response.add_post_render_callback(lambda r: cache.set(cache_key, (r, time.time(),), settings.BETTERCACHE_LOCAL_MAXAGE))
         else:
             cache.set(cache_key, (response, time.time(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
@@ -133,7 +133,7 @@ class CachingMixin(object):
             method = request.method
         return "bettercache_page:%s:%s" %(request.build_absolute_uri(), method)
 
-    def send_task(self, request, response):
+    def send_task(self, request, response, renderable=True):
         ''' send off a celery task for the current page and recache '''
         # TODO is this too messy?
         from bettercache.tasks import GeneratePage
@@ -141,7 +141,7 @@ class CachingMixin(object):
             GeneratePage.apply_async((strip_wsgi(request),))
         except:
             logger.error("failed to send celery task")
-        self.set_cache(request, response)
+        self.set_cache(request, response, renderable)
 
 
 def get_header_dict(response, header):
