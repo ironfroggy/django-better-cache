@@ -15,8 +15,10 @@ class BetterView(CachingMixin):
             if expired:
                 logger.error("sending task for %s" %request.build_absolute_uri())
                 self.send_task(request, response)
-            else:
+            elif response:
                 logger.error("not sending task for %s" %request.build_absolute_uri())
+            else:
+                logger.error("cache miss for %s" %request.build_absolute_uri())
 
         # if response is still none we have to proxy
         if response is None:
