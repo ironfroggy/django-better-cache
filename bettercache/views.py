@@ -26,7 +26,6 @@ class BetterView(CachingMixin):
             response['X-Bettercache-Proxy'] = 'false'
             logger.info('request %s from cache' %request.build_absolute_uri)
 
-
         return response
 
 

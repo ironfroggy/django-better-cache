@@ -141,7 +141,7 @@ class CachingMixin(object):
         try:
             GeneratePage.apply_async((strip_wsgi(request),))
         except:
-           pass
+            logger.error("failed to send celery task")
         self.set_cache(request, response)
 
 
