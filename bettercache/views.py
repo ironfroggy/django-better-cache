@@ -14,7 +14,7 @@ class BetterView(CachingMixin):
             # send off the celery task if it's expired
             if expired:
                 logger.error("sending task for %s" %request.build_absolute_uri())
-                self.send_task(request, response, False)
+                self.send_task(request, response)
             elif response:
                 logger.error("not sending task for %s" %request.build_absolute_uri())
             else:
