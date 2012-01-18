@@ -11,6 +11,10 @@ if getattr(settings, 'BETTERCACHE_ORIGIN_PORT', None):
     HOST += ":" + str(settings.BETTERCACHE_ORIGIN_PORT)
 
 
+def clean_local(hostname):
+    return hostname.replace('local.www','www.test').replace(':8000','')
+
+
 def proxy(request):
 
     # TODO: don't hardcode http
@@ -22,6 +26,8 @@ def proxy(request):
     for name, val in request.environ.iteritems():
         if name.startswith('HTTP_'):
             name = header_name(name)
+            if name == "Host":
+                val = clean_local(val)
             headers[name] = val
 
     # TODO: try/except
@@ -30,6 +36,7 @@ def proxy(request):
     info, content = http.request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 
+    response['X-Bettercache-Host'] = request.META['HTTP_HOST']
     for name, val in info.items():
         if not is_hop_by_hop(name):
             response[name] = val
