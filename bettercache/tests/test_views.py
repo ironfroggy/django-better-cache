@@ -10,7 +10,7 @@ class TestView(TestCase):
         self.view.get_cache = lambda x: (None, None, )
         self.view.set_cache = lambda x, y: True
         self.request = mock.Mock()
-        self.request.build_absolute_uri = '_'
+        self.request.build_absolute_uri = lambda : '_'
 
     @mock.patch('bettercache.views.proxy')
     def test_miss(self, proxy):
@@ -23,7 +23,7 @@ class TestView(TestCase):
     @mock.patch('bettercache.views.proxy')
     def test_notexpired(self, proxy, strip_wsgi):
         ''' make sure we don't send off a task if it's not expired '''
-        self.view.get_cache = lambda x: ('_', False, )
+        self.view.get_cache = lambda x: ({}, False, )
         self.view.send_task = mock.Mock()
         self.view.get(self.request)
         self.assertFalse(self.view.send_task.called)
@@ -35,7 +35,7 @@ class TestView(TestCase):
         ''' make sure thats when it's expired the task is sent '''
         self.view.should_bypass_cache = lambda x: False
         self.view.send_task = mock.Mock()
-        self.view.get_cache = lambda x: ('_', True, )
+        self.view.get_cache = lambda x: ({}, True, )
         self.view.get(self.request)
         self.assertTrue(self.view.send_task.called)
         self.assertFalse(proxy.called)

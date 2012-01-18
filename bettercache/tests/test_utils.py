@@ -1,5 +1,5 @@
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest2 import TestCase
 
 import mock
@@ -141,9 +141,9 @@ class TestCachingMixin(TestCase):
         self.assertEquals(cm.get_cache(req), (None, None))
         cm.cache_key = lambda x: 'test_key'
         self.assertEquals(cm.get_cache(req), (None, None))
-        fake_cache.set('test_key', ('resp', datetime.now() - timedelta(days=1))) 
+        fake_cache.set('test_key', ('resp', time.time() - 3600)) 
         self.assertEquals(cm.get_cache(req), ('resp', True))
-        fake_cache.set('test_key', ('resp', datetime.now() + timedelta(days=1))) 
+        fake_cache.set('test_key', ('resp', time.time() + 3600)) 
         self.assertEquals(cm.get_cache(req), ('resp', False))
 
     @mock.patch('bettercache.utils.cache')

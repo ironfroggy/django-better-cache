@@ -1,6 +1,5 @@
 import time
 from copy import copy
-from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.cache import cache
@@ -107,9 +106,9 @@ class CachingMixin(object):
         cache_key = self.cache_key(request)
         #presumably this is to deal with requests with attr functions that won't pickle
         if hasattr(response, 'render') and callable(response.render):
-            response.add_post_render_callback(lambda r: cache.set(cache_key, (r, datetime.now(),), settings.BETTERCACHE_LOCAL_MAXAGE))
+            response.add_post_render_callback(lambda r: cache.set(cache_key, (r, time.time(),), settings.BETTERCACHE_LOCAL_MAXAGE))
         else:
-            cache.set(cache_key, (response, datetime.now(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
+            cache.set(cache_key, (response, time.time(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
 
     def get_cache(self, request):
         """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
@@ -124,7 +123,7 @@ class CachingMixin(object):
             cached_response = cache.get(cache_key, None)
         if cached_response is None:
             return None, None
-        if cached_response[1] < datetime.now() - timedelta(seconds=settings.BETTERCACHE_LOCAL_POSTCHECK):
+        if cached_response[1] < time.time() - settings.BETTERCACHE_LOCAL_POSTCHECK:
             return cached_response[0], True
         return cached_response[0], False
 
