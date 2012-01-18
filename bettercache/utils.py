@@ -131,7 +131,7 @@ class CachingMixin(object):
         """ the cache key is the absolute uri and the request method """
         if method is None:
             method = request.method
-        return "page_cache:%s:%s" %(request.build_absolute_uri(), method)
+        return "bettercache_page:%s:%s" %(request.build_absolute_uri(), method)
 
     def send_task(self, request, response):
         ''' send off a celery task for the current page and recache '''
