@@ -13,16 +13,16 @@ class BetterView(CachingMixin):
             response, expired = self.get_cache(request)
             # send off the celery task if it's expired
             if expired:
-                logger.error("sending task for %s" %request.build_absolute_uri())
+                logger.info("sending task for %s" %request.build_absolute_uri())
                 self.send_task(request, response)
             elif response:
-                logger.error("not sending task for %s" %request.build_absolute_uri())
+                logger.info("not sending task for %s" %request.build_absolute_uri())
             else:
-                logger.error("cache miss for %s" %request.build_absolute_uri())
+                logger.info("cache miss for %s" %request.build_absolute_uri())
 
         # if response is still none we have to proxy
         if response is None:
-            logger.error('request %s proxied' %request.build_absolute_uri())
+            logger.info('request %s proxied' %request.build_absolute_uri())
             response = proxy(request)
             #TODO: delete the following two lines
             #self.set_cache(request, response)
