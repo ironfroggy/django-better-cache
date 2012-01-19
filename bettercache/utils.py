@@ -102,13 +102,16 @@ class CachingMixin(object):
         return False
 
     def set_cache(self, request, response):
-        """ caches the response """
-        cache_key = self.cache_key(request)
-        #presumably this is to deal with requests with attr functions that won't pickle
-        if hasattr(response, 'render') and callable(response.render):
-            response.add_post_render_callback(lambda r: cache.set(cache_key, (r, time.time(),), settings.BETTERCACHE_LOCAL_MAXAGE))
-        else:
-            cache.set(cache_key, (response, time.time(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
+        """ caches the response supresses and logs exceptions"""
+        try:
+            cache_key = self.cache_key(request)
+            #presumably this is to deal with requests with attr functions that won't pickle
+            if hasattr(response, 'render') and callable(response.render):
+                response.add_post_render_callback(lambda r: cache.set(cache_key, (r, time.time(),), settings.BETTERCACHE_LOCAL_MAXAGE))
+            else:
+                cache.set(cache_key, (response, time.time(),) , settings.BETTERCACHE_LOCAL_MAXAGE)
+        except:
+            logger.error("failed to cache to %s" %cache_key)
 
     def get_cache(self, request):
         """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
