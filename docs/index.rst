@@ -115,6 +115,8 @@ Contributing
 
 Fork and send pull requests, please!
 
+http://github.com/ironfroggy/django-better-cache/
+
 
 Indices and tables
 ==================
