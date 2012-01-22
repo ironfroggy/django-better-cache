@@ -43,7 +43,7 @@ class ModelTest(unittest.TestCase):
     def test_non_string_key(self):
         a = A(a='foo', b=42)
         b = A(a='foo', b='42')
-        a.key()
+        self.assertNotEqual(a.key(), b.key())
 
     def test_save_and_get(self):
         c = C(name='T', value=42)
