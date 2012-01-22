@@ -56,8 +56,14 @@ class CacheModel(object):
         return keys
 
     @classmethod
-    def _key(self, keys):
-        return '/'.join('='.join((k, v)) for (k, v) in keys.items())
+    def _key(cls, keys):
+        def sk(k, v):
+            try:
+                field = getattr(cls, k)
+            except AttributeError:
+                return v
+            return field.python_to_cache(v)
+        return '/'.join('='.join((k, sk(k, v))) for (k, v) in keys.items())
 
     def key(self):
         return self._key(self._all_keys())

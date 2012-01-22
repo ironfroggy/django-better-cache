@@ -40,6 +40,11 @@ class ModelTest(unittest.TestCase):
         s = c.serialize()
         c2 = C.deserialize(s)
 
+    def test_non_string_key(self):
+        a = A(a='foo', b=42)
+        b = A(a='foo', b='42')
+        a.key()
+
     def test_save_and_get(self):
         c = C(name='T', value=42)
         c.save()
