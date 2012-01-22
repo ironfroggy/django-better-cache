@@ -59,3 +59,9 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(a.keys(), d.keys())
         self.assertNotEqual(a._all_keys(), d._all_keys())
 
+    def test_missing(self):
+        def get():
+            C.get(name='missing')
+
+        self.assertRaises(CacheModel.Missing, get)
+

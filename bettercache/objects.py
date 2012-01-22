@@ -14,6 +14,11 @@ from django.core.cache import cache as _cache
 
 class CacheModel(object):
 
+    expires = None
+
+    class Missing(Exception):
+        pass
+
     def __init__(self, *args, **kwargs):
         items = [(k, v) for (k, v)
             in vars(type(self)).items()
@@ -82,15 +87,19 @@ class CacheModel(object):
             data[fieldname] = getattr(cls, fieldname).cache_to_python(value)
         return cls(**data)
 
-    def save(self):
+    def save(self, expires=None):
+        if expires is None:
+            expires = self.expires
         s = self.serialize()
         key = self._key(self._all_keys())
-        _cache.set(key, s)
+        _cache.set(key, s, expires)
 
     @classmethod
     def get(cls, **kwargs):
         k = cls(**kwargs).key()
         data = _cache.get(k)
+        if data is None:
+            raise cls.Missing(k)
         return cls.deserialize(data)
 
     def delete(self):
