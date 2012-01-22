@@ -62,8 +62,8 @@ class CacheModel(object):
                 field = getattr(cls, k)
             except AttributeError:
                 return v
-            return field.python_to_cache(v)
-        return '/'.join('='.join((k, sk(k, v))) for (k, v) in keys.items())
+            return '='.join((k, field.python_to_cache(v)))
+        return '/'.join(sk(k, v) for (k, v) in keys.items())
 
     def key(self):
         return self._key(self._all_keys())
