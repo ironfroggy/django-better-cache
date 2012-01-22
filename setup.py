@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='bettercache',
-    version='0.3',
+    version='0.5',
     description='A replacement template cache',
     author='Calvin Spealman',
     author_email='ironfroggy@gmail.com',
