@@ -17,6 +17,13 @@ class D(CacheModel):
     a = Key()
     b = Key()
 
+class E(CacheModel):
+    a = Key()
+    b = Field()
+
+    def from_miss(self, a):
+        self.b = a + 1
+
 
 class ModelTest(unittest.TestCase):
 
@@ -64,4 +71,9 @@ class ModelTest(unittest.TestCase):
             C.get(name='missing')
 
         self.assertRaises(CacheModel.Missing, get)
+
+    def test_from_miss(self):
+        e = E.get(a=1)
+
+        self.assertEqual(e.b, 2)
 
