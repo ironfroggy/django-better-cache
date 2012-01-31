@@ -99,8 +99,26 @@ class CacheModel(object):
         k = cls(**kwargs).key()
         data = _cache.get(k)
         if data is None:
-            raise cls.Missing(k)
+            new = cls()
+            new.from_miss(**kwargs)
+            return new
         return cls.deserialize(data)
+
+    def from_miss(self, **kwargs):
+        """Called to initialize an instance when it is not found in the cache.
+        
+        For example, if your CacheModel should pull data from the database to
+        populate the cache,
+
+            ...
+
+            def from_miss(self, username):
+                user = User.objects.get(username=username)
+                self.email = user.email
+                self.full_name = user.get_full_name()
+        """
+    
+        raise type(self).Missing(type(self)(**kwargs).key())
 
     def delete(self):
         key = self._key(self._all_keys())
