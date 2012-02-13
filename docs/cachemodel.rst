@@ -34,6 +34,36 @@ the ``Key`` fields for an instance.
 
 The cache objects can save any fields with JSON-serializable values.
 
+
+CachedFormMethod
+================
+
+One useful CacheModel is included with ``bettercache``, named
+``bettercache.forms.CachedFOrmMethod``. This class acts as a decorator for
+methods on Django form classes, and will cache the results of those methods
+using both its own parameters and the data submitted with the form. This
+is useful for caching search forms and others which are fuel for costly
+database operations.
+
+::
+
+    class FriendsLookup(forms.Form):
+
+        username = forms.CharField(required=True)
+
+        @CachedFormMethod(expires=60*15) # expire in 15 minutes
+        def get_friends_list(self, include_pending=False):
+            username = self.cleaned_data['username']
+            friends = Friendship.objects.filter(
+                from_user__username=username)
+            if include_pending:
+                friends = friends.filter(status__in=(PENDING, APPROVED))
+            else:
+                friends = friends.filter(status=APPROVED)
+
+            return friends
+
+
 API Reference
 -------------
 

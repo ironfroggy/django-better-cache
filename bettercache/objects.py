@@ -95,14 +95,26 @@ class CacheModel(object):
         _cache.set(key, s, expires)
 
     @classmethod
-    def get(cls, **kwargs):
+    def _get(cls, **kwargs):
         k = cls(**kwargs).key()
         data = _cache.get(k)
+        return data
+
+    @classmethod
+    def get(cls, **kwargs):
+        data = cls._get(**kwargs)
         if data is None:
             new = cls()
             new.from_miss(**kwargs)
             return new
         return cls.deserialize(data)
+
+    @classmethod
+    def get_or_create(cls, **kwargs):
+        data = cls._get(**kwargs)
+        if data is None:
+            return cls(**kwargs), True
+        return cls.deserialize(data), False
 
     def from_miss(self, **kwargs):
         """Called to initialize an instance when it is not found in the cache.
