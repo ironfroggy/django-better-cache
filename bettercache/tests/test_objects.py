@@ -24,6 +24,10 @@ class E(CacheModel):
     def from_miss(self, a):
         self.b = a + 1
 
+class F(CacheModel):
+    a = Key()
+    b = Field()
+
 
 class ModelTest(unittest.TestCase):
 
