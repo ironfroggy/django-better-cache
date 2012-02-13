@@ -51,7 +51,7 @@ database operations.
 
         username = forms.CharField(required=True)
 
-        @CachedFormMethod()
+        @CachedFormMethod(expires=60*15) # expire in 15 minutes
         def get_friends_list(self, include_pending=False):
             username = self.cleaned_data['username']
             friends = Friendship.objects.filter(
