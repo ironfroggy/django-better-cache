@@ -1,5 +1,5 @@
 from bettercache.objects import CacheModel, Field, Key
-from bettercache.forms import CachedFormMethod
+from bettercache.decorators import CachedFormMethod
 
 from django import forms
 
