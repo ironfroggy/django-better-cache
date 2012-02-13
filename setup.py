@@ -3,10 +3,10 @@
 from distutils.core import setup
 
 setup(name='bettercache',
-    version='0.5.1',
+    version='0.5.2',
     description='A replacement template cache',
     author='Calvin Spealman',
     author_email='ironfroggy@gmail.com',
     url='http://github.com/ironfroggy/django-better-cache',
-    packages=['bettercache'],
+    packages=['bettercache', 'bettercache.objects', 'bettercache.decorators'],
 )
