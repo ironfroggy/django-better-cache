@@ -39,7 +39,7 @@ CachedFormMethod
 ================
 
 One useful CacheModel is included with ``bettercache``, named
-``bettercache.forms.CachedFOrmMethod``. This class acts as a decorator for
+``bettercache.decorators.CachedFormMethod``. This class acts as a decorator for
 methods on Django form classes, and will cache the results of those methods
 using both its own parameters and the data submitted with the form. This
 is useful for caching search forms and others which are fuel for costly
