@@ -8,6 +8,7 @@ or invalidating entries easily.
 
 import json
 import collections
+import urllib
 
 from django.core.cache import cache as _cache
 
@@ -68,7 +69,7 @@ class CacheModel(object):
             except AttributeError:
                 return v
             return '='.join((k, field.python_to_cache(v)))
-        return '/'.join(sk(k, v) for (k, v) in keys.items())
+        return urllib.quote('/'.join(sk(k, v) for (k, v) in keys.items()))
 
     def key(self):
         return self._key(self._all_keys())
