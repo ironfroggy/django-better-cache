@@ -13,6 +13,9 @@ class C(CacheModel):
     name = Key()
     value = Field()
 
+class C2(C):
+    pass
+
 class D(CacheModel):
     a = Key()
     b = Key()
@@ -80,4 +83,11 @@ class ModelTest(unittest.TestCase):
         e = E.get(a=1)
 
         self.assertEqual(e.b, 2)
+
+    def test_empty_subclass(self):
+        C(name='foo', value=10).save()
+        C2(name='foo', value=20).save()
+
+        self.assertEqual(10, C.get(name='foo').value)
+        self.assertEqual(20, C2.get(name='foo').value)
 

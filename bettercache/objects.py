@@ -21,10 +21,7 @@ class CacheModel(object):
         pass
 
     def __init__(self, *args, **kwargs):
-        items = [(k, v) for (k, v)
-            in vars(type(self)).items()
-            if isinstance(v, Field)
-        ]
+        items = self._get_fields()
         known_fields = set()
         for name, field in items:
             if field.name is None:
@@ -38,6 +35,13 @@ class CacheModel(object):
                 setattr(self, name, value)
             else:
                 raise AttributeError("Unknown field '{0}' given.".format(name))
+
+    @classmethod
+    def _get_fields(cls):
+        for k in dir(cls):
+            v = getattr(cls, k)
+            if isinstance(v, Field):
+                yield (k, v)
 
     def _all_keys(self):
         keys = self.keys()
