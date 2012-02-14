@@ -8,6 +8,8 @@ class CachedFormMethod(CacheModel):
     classname = Key()
     method_name = Key()
     data = Key()
+    args = Key()
+    kwargs = Key()
 
     result = Field()
 
@@ -29,7 +31,10 @@ class CachedFormMethod(CacheModel):
                     module=module,
                     classname=classname,
                     method_name=method_name,
-                    data=data)
+                    data=data,
+                    args=args,
+                    kwargs=sorted(kwargs.items()),
+                )
 
                 if new:
                     result_cache.result = func(form, *args, **kwargs)

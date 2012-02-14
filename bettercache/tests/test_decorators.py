@@ -16,8 +16,11 @@ class SimpleForm(forms.Form):
     username = forms.CharField(required=True)
 
     @CachedFormMethod.cache()
-    def get_full_name(self):
-        return names[self.cleaned_data['username']]
+    def get_full_name(self, skip_middle=False):
+        full_name = names[self.cleaned_data['username']].split()
+        if skip_middle:
+            del full_name[1]
+        return ' '.join(full_name)
 
 
 class CachedFormMethodTests(unittest.TestCase):
@@ -28,6 +31,7 @@ class CachedFormMethodTests(unittest.TestCase):
 
         self.assertEqual('User Name One', form1.get_full_name())
         self.assertEqual('User Name Two', form2.get_full_name())
+        self.assertEqual('User Two', form2.get_full_name(skip_middle=True))
 
         names.clear()
 
