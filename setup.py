@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(name='bettercache',
     version='0.5.3',
-    description='A replacement template cache',
+    description = "A suite of better cache tools for Django.",
+    license = "MIT",
     author='Calvin Spealman',
     author_email='ironfroggy@gmail.com',
     url='http://github.com/ironfroggy/django-better-cache',
-    packages=['bettercache', 'bettercache.objects', 'bettercache.decorators'],
+    packages = find_packages(),
 )
