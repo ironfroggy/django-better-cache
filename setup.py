@@ -9,4 +9,8 @@ setup(name='bettercache',
     author_email='ironfroggy@gmail.com',
     url='http://github.com/ironfroggy/django-better-cache',
     packages = find_packages(),
+    install_requires = [
+        'celery >= 2.4.2',
+        'httplib2 >= 0.6.0',
+    ],
 )
