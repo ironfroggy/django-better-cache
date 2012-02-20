@@ -145,3 +145,5 @@ LOGGING = {
         },
     }
 }
+
+BETTERCACHE_LOCAL_POSTCHECK = 60
