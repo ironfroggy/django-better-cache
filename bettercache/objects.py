@@ -7,7 +7,10 @@ or invalidating entries easily.
 """
 
 import json
-import collections
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 import urllib
 
 from django.core.cache import cache as _cache
@@ -46,7 +49,7 @@ class CacheModel(object):
         return keys
         
     def keys(self):
-        keys = collections.OrderedDict()
+        keys = OrderedDict()
 
         def order_key((k, v)):
             cache_key = getattr(type(self), k)
