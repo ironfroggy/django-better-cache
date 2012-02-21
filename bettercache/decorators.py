@@ -26,8 +26,8 @@ class CachedFormMethod(CacheModel):
                 classname = type(form).__name__
                 method_name = func.__name__
                 data = sorted(form.data.items())
-                
-                result_cache, new = CachedFormMethod.get_or_create(
+
+                result_cache, new = cls.get_or_create(
                     module=module,
                     classname=classname,
                     method_name=method_name,

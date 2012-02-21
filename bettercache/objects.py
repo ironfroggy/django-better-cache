@@ -7,6 +7,7 @@ or invalidating entries easily.
 """
 
 import json
+import cPickle as pickle
 try:
     from collections import OrderedDict
 except ImportError:
@@ -24,9 +25,11 @@ class CacheModel(object):
         pass
 
     def __init__(self, *args, **kwargs):
-        items = [(k, v) for (k, v)
-            in vars(type(self)).items()
-            if isinstance(v, Field)
+        items = [
+            (k, getattr(type(self), k))
+            for k
+            in dir(type(self))
+            if isinstance(getattr(type(self), k), Field)
         ]
         known_fields = set()
         for name, field in items:
@@ -55,9 +58,11 @@ class CacheModel(object):
             cache_key = getattr(type(self), k)
             return cache_key.order
         
-        items = [(k, v) for (k, v)
-            in vars(type(self)).items()
-            if isinstance(v, Key)
+        items = [
+            (k, getattr(type(self), k))
+            for k
+            in dir(type(self))
+            if isinstance(getattr(type(self), k), Key)
         ]
 
         for k, v in sorted(items, key=order_key):
@@ -166,6 +171,15 @@ class Field(object):
 
     def cache_to_python(self, value):
         return json.loads(value)
+
+class PickleField(Field):
+    """Alternative serialization using Pickle format."""
+
+    def python_to_cache(self, value):
+        return pickle.dumps(value)
+
+    def cache_to_python(self, value):
+        return pickle.loads(value.encode('ascii'))
 
 
 class Key(Field):
