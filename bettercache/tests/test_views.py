@@ -32,7 +32,7 @@ class TestView(TestCase):
     @mock.patch('bettercache.views.strip_wsgi')
     @mock.patch('bettercache.views.proxy')
     def test_expired(self, proxy, strip_wsgi):
-        ''' make sure thats when it's expired the task is sent '''
+        ''' make sure that when it's expired the task is sent '''
         self.view.should_bypass_cache = lambda x: False
         self.view.send_task = mock.Mock()
         self.view.get_cache = lambda x: ({}, True, )
