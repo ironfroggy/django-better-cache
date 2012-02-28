@@ -35,6 +35,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   middleware
+   proxy
+
 Indices and tables
 ==================
 
