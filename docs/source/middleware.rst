@@ -49,4 +49,5 @@ Betterache middleware TODO list
 ________________________________
 * Remove akamai headers and create hooks for additional header manipulation
 * Allow views to set non-default cache local_maxage/postchecks?
-* switch to better settings module
+* Switch to better settings module
+* Switch to not caching django request objects but json body/header/additional info objects
