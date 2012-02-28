@@ -36,6 +36,17 @@ The bettercache middleware will change some of the request headers before it cac
   - `post-check` is set to `BETTERCACHE_EDGE_POSTCECK_RATIO` * the `max-age`.
 * The `Edge-Control` header is set with `cache-maxage` to `BETTERCACHE_EDGE_MAXAGE`.
 
-Bettercache settings
-_____________________
-*
+Bettercache middleware settings
+________________________________
+The following settings are currently aspirational but the changes should be coming soon.
+
+* BETTERCACHE_EXTERNAL_MAXAGE - the default external the Cache-Control max-age/pre-check headers to
+* BETTERCACHE_EXTERNAL_POSTCHECK_RATIO - the ratio of max_age to set the Cache-Control post-check header to
+* BETTERCACHE_LOCAL_MAXAGE - the number of seconds to cache pages for locally
+* BETTERCACHE_LOCAL_POSTCHECK - the number of seconds after which to attempt to regenerate a page locally
+
+Betterache middleware TODO list
+________________________________
+* Remove akamai headers and create hooks for additional header manipulation
+* Allow views to set non-default cache local_maxage/postchecks?
+* switch to better settings module
