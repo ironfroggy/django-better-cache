@@ -25,7 +25,11 @@ class CachedMethod(CacheModel):
                 method_name = func.__name__
 
                 data = {} 
-                for key_attr in key_attrs:
+                if isinstance(key_attrs, basestring):
+                    _key_attrs = key_attrs.split()
+                else:
+                    _key_attrs = key_attrs
+                for key_attr in _key_attrs:
                     key_value = getattr(self, key_attr)
                     if isinstance(key_value, dict):
                         key_value = ('dict', sorted(key_value.items()))

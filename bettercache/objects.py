@@ -56,14 +56,21 @@ class CacheModel(object):
             cache_key = getattr(type(self), k)
             return cache_key.order
         
+        items = [(k, getattr(type(self), k)) for k
+            in dir(type(self))
+        ]
         items = [(k, v) for (k, v)
-            in vars(type(self)).items()
+            in items
             if isinstance(v, Key)
         ]
 
         for k, v in sorted(items, key=order_key):
             keys[k] = getattr(self, k)
         return keys
+
+    @classmethod
+    def _key_quote(cls, unquoted):
+        return unquoted.replace('_', '__').replace(' ', '_')
 
     @classmethod
     def _key(cls, keys):
@@ -73,7 +80,7 @@ class CacheModel(object):
             except AttributeError:
                 return v
             return '='.join((k, field.python_to_cache(v)))
-        return urllib.quote('/'.join(sk(k, v) for (k, v) in keys.items()))
+        return cls._key_quote('/'.join(sk(k, v) for (k, v) in keys.items()))
 
     def key(self):
         return self._key(self._all_keys())
