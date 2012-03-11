@@ -64,4 +64,4 @@ class CachedFormMethod(CachedMethod):
 
     @classmethod
     def cache(cls, expires=None):
-        return super(CachedFormMethod, cls).cache(['data'], expires)
+        return super(CachedFormMethod, cls).cache(['cleaned_data'], expires)
