@@ -1,4 +1,5 @@
 .. Bettercache proxy documentation
+
 Bettercache Proxy Server
 ======================================
 
@@ -12,5 +13,6 @@ Settings required for proxy server
 ___________________________________
 In addition to the normal settings for the bettercache middleware, celery and django the following
 setting is also required for the proxy server.
+
 * BETTERCACHE_ORIGIN_HOST - The server which proxy traffic should be directed at. The host name from the
   original request will be passed on.
