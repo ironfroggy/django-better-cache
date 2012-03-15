@@ -5,12 +5,11 @@
 
 Welcome to Django Bettercache's documentation!
 ==============================================
-Bettercache provides a handful of different caching features. There is a cache templatetag that provides invalidation. There
+Bettercache provides a handful of different caching features.
 
 Template Tag
 _____________
 The bettercache cache template tag provides some automatic invalidation
-
 
 Middleware
 __________
