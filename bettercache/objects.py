@@ -7,7 +7,11 @@ or invalidating entries easily.
 """
 
 import json
-import collections
+import cPickle as pickle
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 import urllib
 
 from django.core.cache import cache as _cache
@@ -50,7 +54,7 @@ class CacheModel(object):
         return keys
         
     def keys(self):
-        keys = collections.OrderedDict()
+        keys = OrderedDict()
 
         def order_key((k, v)):
             cache_key = getattr(type(self), k)
@@ -174,6 +178,15 @@ class Field(object):
 
     def cache_to_python(self, value):
         return json.loads(value)
+
+class PickleField(Field):
+    """Alternative serialization using Pickle format."""
+
+    def python_to_cache(self, value):
+        return pickle.dumps(value)
+
+    def cache_to_python(self, value):
+        return pickle.loads(value.encode('ascii'))
 
 
 class Key(Field):
