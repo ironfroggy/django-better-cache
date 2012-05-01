@@ -11,7 +11,13 @@ CACHES = {
         },
 }
 
-DATABASES = {}
+BETTERCACHE_LOCAL_POSTCHECK = 120
+DATABASES = {
+    'default': {
+                'ENGINE': 'sqlite3',
+                'NAME': ':memory:',
+    }
+}
 ADMINS = ( )
 TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
