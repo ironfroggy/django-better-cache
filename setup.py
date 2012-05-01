@@ -8,25 +8,5 @@ setup(
     description = "A suite of better cache tools for Django.",
     license = "MIT",
     url = "https://github.com/coxmediagroup/django-better-cache",
-    # could also include long_description, download_url, classifiers, etc.
-
-    # Project uses reStructuredText, so ensure that the docutils get
-    # installed or upgraded on the target machine
-
-    # Testing removing from install_requires -MH
-    #'django>=1.3,<1.4',
-
-    install_requires = [
-        'docutils>=0.3',
-    ],
-
-    include_package_data=True,
-    package_data = {
-        # If any package contains *.txt or *.rst files, include them:
-        '': ['*.txt', '*.rst'],
-        # And include any *.msg files found in the package, too:
-        '': ['*.msg'],
-    },
-
+    install_requires = [],
 )
-
