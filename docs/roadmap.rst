@@ -1,12 +1,6 @@
 Roadmap
 =======
 
-0.5
----
-
-Current. A good start.
-
-
 0.6
 ---
 
@@ -14,8 +8,6 @@ The next release of ``bettercache`` is planned to expand upon
 the :ref:`CacheModel` even further, handling cache misses and
 allow push updates of cached data, among other new treats.
 
-* from_miss() methods on CachModel can be implemented to initialize
-  an instance if no data was found in the cache
 * from_model_APP_MODEL() methods on CacheModel can be implemented to
   update the cached data when models are updated
 
