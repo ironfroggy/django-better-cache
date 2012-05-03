@@ -1,4 +1,4 @@
-from bettercache.objects import CacheModel, Field, Key
+from bettercache.objects import CacheModel, Field, Key, PickleField
 import unittest
 
 
@@ -30,6 +30,10 @@ class E(CacheModel):
 class F(CacheModel):
     a = Key()
     b = Field()
+
+class P(CacheModel):
+    k = Key()
+    p = PickleField()
 
 
 class ModelTest(unittest.TestCase):
@@ -94,4 +98,11 @@ class ModelTest(unittest.TestCase):
 
         self.assertEqual(10, C.get(name='foo').value)
         self.assertEqual(20, C2.get(name='foo').value)
+
+    def test_pickle_field(self):
+        s = set((1, 2, 3))
+        p = P(k=1, p=s)
+        p.save()
+
+        self.assertEqual(s, P.get(k=1).p)
 
