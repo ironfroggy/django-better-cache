@@ -1,3 +1,6 @@
+Full Documentation: http://readthedocs.org/docs/django-better-cache/en/latest/
+Mailing List: https://groups.google.com/forum/#!forum/bettercache
+
 ## Better Cache
 
 Better Cache is a replacement for the default cache template tag library from Django.

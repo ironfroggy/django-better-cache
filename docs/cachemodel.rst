@@ -35,15 +35,43 @@ the ``Key`` fields for an instance.
 The cache objects can save any fields with JSON-serializable values.
 
 
-CachedFormMethod
+CachedMethod
 ================
 
 One useful CacheModel is included with ``bettercache``, named
-``bettercache.decorators.CachedFormMethod``. This class acts as a decorator for
-methods on Django form classes, and will cache the results of those methods
-using both its own parameters and the data submitted with the form. This
-is useful for caching search forms and others which are fuel for costly
-database operations.
+``bettercache.decorators.CachedMethod``. This class acts as a decorator for
+methods, and will cache the results of those methods using a defined set of
+attributes from the instance. For any instance of the class with the same
+values for this set of attributes, the method will use the cached value
+properly, but also use its own parameters. 
+
+This is a decorator-factory, and it takes one required parameter and one
+optional.
+
+::
+
+    @CachedMethod('attributes to cache on', expires=SECONDS)
+
+::
+
+    class Home(object):
+
+        def __init__(self, address):
+            self.address = address
+
+        @CachedMethod('address')
+        def geocode(self):
+            return g.geocode(self.address)
+
+
+CachedFormMethod
+==================
+
+An included CachedMethod decorator sublass which knows how to cache methods on
+Django forms, such that given the same form results, the methods will be
+cached from previous forms with the same results. This caches based on the
+`cleaned_data` rather than pre-validation `data`, so if your cleaning
+normalizes the input the caching will be more efficient.
 
 ::
 
