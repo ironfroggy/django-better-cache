@@ -124,6 +124,11 @@ API Reference
     properties. The values of these properties in your instance will
     all be serialized and sent to the cache when the object is saved.
 
+``PickleField``
+    Special field type which uses the python ``pickle`` format, rather
+    than ``JSON``, for serialization. This should only be used in
+    special cases, as pickle has a number of drawbacks and corner cases.
+
 ``Key``
     At least one of your fields must be defined as a ``Key``, which
     will be combined with the class information to generate a unique
