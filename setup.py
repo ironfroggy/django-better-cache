@@ -8,5 +8,9 @@ setup(
     description = "A suite of better cache tools for Django.",
     license = "MIT",
     url = "https://github.com/coxmediagroup/django-better-cache",
-    install_requires = [],
+    install_requires = [
+        "django==1.3",
+        "celery==2.4.2",
+        "httplib2==0.6.0"
+    ]
 )
