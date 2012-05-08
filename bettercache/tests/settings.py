@@ -2,7 +2,7 @@ import os
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True
-ROOT_URLCONF = 'proxly.urls'
+ROOT_URLCONF = 'proxley.urls'
 INSTALLED_APPS = ( 'bettercache', )
 
 CACHES = {
