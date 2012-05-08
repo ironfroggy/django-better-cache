@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name = "bettercache",
-    version = "0.3.1",
+    version = "0.3.1-cmg",
     packages = find_packages(),
     author = "Cox Media Group",
     author_email = "opensource@coxinc.com",
