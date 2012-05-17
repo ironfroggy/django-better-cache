@@ -1,2 +1,4 @@
 *.pyc
 *.swp
+.tox
+bettercache.egg-info
