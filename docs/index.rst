@@ -23,6 +23,13 @@ Table of Contents
    api
    roadmap
 
+Discussion
+----------
+
+You can make suggestions and seek assistance on the mailing list:
+
+https://groups.google.com/forum/#!forum/bettercache
+
 
 Contributing
 ------------

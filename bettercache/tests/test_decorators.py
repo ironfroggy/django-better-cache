@@ -29,6 +29,9 @@ class CachedFormMethodTests(unittest.TestCase):
         form1 = SimpleForm(data={'username': 'username1'})
         form2 = SimpleForm(data={'username': 'username2'})
 
+        form1.is_valid()
+        form2.is_valid()
+
         self.assertEqual('User Name One', form1.get_full_name())
         self.assertEqual('User Name Two', form2.get_full_name())
         self.assertEqual('User Two', form2.get_full_name(skip_middle=True))
