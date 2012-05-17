@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.handlers.base import BaseHandler
 
 class AsyncHandler(BaseHandler):
+    """Used to process HTTP requests from celery tasks."""
+
     def __init__(self):
         super(AsyncHandler, self).__init__()
 

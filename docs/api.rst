@@ -12,9 +12,7 @@ API Documentation
 ``handlers``
 -------------
 
-.. automodule:: bettercache.handlers
-    :members:
-    :undoc-members:
+.. autoclass:: bettercache.handlers.AsyncHandler
 
 ``middleware``
 ---------------
