@@ -1,11 +1,15 @@
 from bettercache.utils import CachingMixin, strip_wsgi
-from bettercache.tasks import GeneratePage
 from bettercache.proxy import proxy
 
 import logging
 logger = logging.getLogger()
 
 class BetterView(CachingMixin):
+    """Accepts any path and attempts to server it from the cache. If it cannot
+    find the response in the cache, it will use ``bettercache.proxy`` to fulfill
+    it, and cache the response.
+    """
+
     def get(self, request):
         response = None
         #should this bypass this replicates part of the irule

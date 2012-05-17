@@ -18,11 +18,18 @@ from django.core.cache import cache as _cache
 
 
 class CacheModel(object):
+    """Defines a structured class of cache entry, in the same way a DB
+    defines tables or other schema. The structure is a series of fields
+    and keys, and instances of ``CacheModel`` can be saved to the cache
+    and fetched back if you know the keys.
+    
+    You do not need to construct key strings by hand.
+    """
 
     expires = None
 
     class Missing(Exception):
-        pass
+        """Raised when fetching with keys that are not found."""
 
     def __init__(self, *args, **kwargs):
         items = self._get_fields()
@@ -89,9 +96,13 @@ class CacheModel(object):
         return cls._key_quote('/'.join(sk(k, v) for (k, v) in keys.items()))
 
     def key(self):
+        """Produce a unique key-string based on the Key fields defined by the class."""
+
         return self._key(self._all_keys())
 
     def serialize(self):
+        """Serialize all the fields into one string."""
+
         keys = self._all_keys()
         serdata = {}
         for fieldname, value in self._data.items():
@@ -100,12 +111,16 @@ class CacheModel(object):
 
     @classmethod
     def deserialize(cls, string):
+        """Reconstruct a previously serialized string back into an instance of a ``CacheModel``."""
+
         data = json.loads(string)
         for fieldname, value in data.items():
             data[fieldname] = getattr(cls, fieldname).cache_to_python(value)
         return cls(**data)
 
     def save(self, expires=None):
+        """Save a copy of the object into the cache."""
+
         if expires is None:
             expires = self.expires
         s = self.serialize()
@@ -120,6 +135,8 @@ class CacheModel(object):
 
     @classmethod
     def get(cls, **kwargs):
+        """Get a copy of the type from the cache and reconstruct it."""
+
         data = cls._get(**kwargs)
         if data is None:
             new = cls()
@@ -129,6 +146,8 @@ class CacheModel(object):
 
     @classmethod
     def get_or_create(cls, **kwargs):
+        """Get a copy of the type from the cache, or create a new one."""
+
         data = cls._get(**kwargs)
         if data is None:
             return cls(**kwargs), True
@@ -151,6 +170,8 @@ class CacheModel(object):
         raise type(self).Missing(type(self)(**kwargs).key())
 
     def delete(self):
+        """Deleting any existing copy of this object from the cache."""
+
         key = self._key(self._all_keys())
         _cache.delete(key)
 

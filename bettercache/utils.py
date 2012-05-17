@@ -13,8 +13,11 @@ logger = logging.getLogger()
 CACHEABLE_STATUS = [200, 203, 300, 301, 404, 410]
 
 class CachingMixin(object):
+    """Common facilities bettercache needs to deal with cache headers."""
+
     def patch_headers(self, response):
-        """ set the headers we want for caching """
+        """Set the headers we want for caching."""
+
         # Remove Vary:Cookie if we want to cache non-anonymous
         if not getattr(settings, 'BETTERCACHE_ANONYMOUS_ONLY', False):
             vdict = get_header_dict(response, 'Vary')
@@ -48,8 +51,11 @@ class CachingMixin(object):
 
 
     def session_accessed(self, request):
-        """ from django.middleware.cache.UpdateCacheMiddleware._session_accesed 
-            I don't know what would cause sessions.acccessed to be there so I'm just copypasting """
+        """``from django.middleware.cache.UpdateCacheMiddleware._session_accesed``
+        
+        I don't know what would cause sessions.acccessed to be there so I'm just copypasting.
+        """
+
         try:
             return request.session.accessed
         except AttributeError:
@@ -57,6 +63,7 @@ class CachingMixin(object):
 
     def should_cache(self, request, response):
         """ Given the request and response should it be cached """
+
         if not getattr(request, '_cache_update_cache', False):
             return False
         if not response.status_code in getattr(settings, 'BETTERCACHE_CACHEABLE_STATUS', CACHEABLE_STATUS):
@@ -70,6 +77,7 @@ class CachingMixin(object):
     @staticmethod
     def should_bypass_cache(request):
         """ Should a request not be served from cache """
+        
         try:
             if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
                 return True
@@ -79,6 +87,7 @@ class CachingMixin(object):
 
     def should_regenerate(self, response):
         """ Check if this page was originally generated less than LOCAL_POSTCHECK seconds ago """
+        
         if response.has_header('Last-Modified'):
             last_modified = parse_http_date(response['Last-Modified'])
             next_regen = last_modified + settings.BETTERCACHE_LOCAL_POSTCHECK
@@ -88,6 +97,7 @@ class CachingMixin(object):
         """ Should this response be cached based on it's headers
             broken out from should_cache for flexibility
         """
+
         cc_dict = get_header_dict(response, 'Cache-Control')
         if cc_dict:
             if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
@@ -103,6 +113,7 @@ class CachingMixin(object):
 
     def set_cache(self, request, response):
         """ caches the response supresses and logs exceptions"""
+
         try:
             cache_key = self.cache_key(request)
             #presumably this is to deal with requests with attr functions that won't pickle
@@ -117,6 +128,7 @@ class CachingMixin(object):
         """ Attempts to get a response from cache, returns a tuple of the response and whether it's expired
             If there is no cached response return (None, None,)
         """
+
         # try and get the cached GET response
         cache_key = self.cache_key(request)
         cached_response = cache.get(cache_key, None)
@@ -132,12 +144,14 @@ class CachingMixin(object):
 
     def cache_key(self, request, method=None):
         """ the cache key is the absolute uri and the request method """
+
         if method is None:
             method = request.method
         return "bettercache_page:%s:%s" %(request.build_absolute_uri(), method)
 
     def send_task(self, request, response):
-        ''' send off a celery task for the current page and recache '''
+        """send off a celery task for the current page and recache"""
+
         # TODO is this too messy?
         from bettercache.tasks import GeneratePage
         try:
@@ -166,7 +180,7 @@ def get_header_dict(response, header):
     return hd
 
 def set_header_dict(response, header, header_dict):
-    """ formats and sets a header dict in a response, inververs of get_header_dict """
+    """Formats and sets a header dict in a response, inververs of get_header_dict."""
     def dictvalue(t):
         if t[1] is True:
             return t[0]
@@ -175,7 +189,7 @@ def set_header_dict(response, header, header_dict):
     response[header] = ', '.join([dictvalue(el) for el in header_dict.items()])
 
 def smart_import(mpath):
-    """ Given a path smart_import will import the module and return the attr reffered to """
+    """Given a path smart_import will import the module and return the attr reffered to."""
     try:
         rest = __import__(mpath)
     except ImportError:
@@ -185,6 +199,8 @@ def smart_import(mpath):
     return rest
 
 def strip_wsgi(request):
+    """Strip WSGI data out of the request META data."""
+
     meta = copy(request.META)
     for key in meta:
         if key[:4] == 'wsgi':

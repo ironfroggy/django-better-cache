@@ -5,9 +5,10 @@ API Documentation
 ``decorators``
 --------------
 
-.. automodule:: bettercache.decorators
+.. autoclass:: bettercache.decorators.CachedMethod
     :members:
-    :undoc-members:
+
+.. autoclass:: bettercache.decorators.CachedFormMethod
 
 ``handlers``
 -------------
@@ -17,15 +18,15 @@ API Documentation
 ``middleware``
 ---------------
 
-.. automodule:: bettercache.middleware
+.. autoclass:: bettercache.middleware.BetterCacheMiddleware
     :members:
     :undoc-members:
 
 ``objects``
 ------------
 
-.. automodule:: bettercache.objects
-    :members:
+.. autoclass:: bettercache.objects.CacheModel
+    :members: Missing, get, get_or_create, deserialize, delete, from_miss, key, keys, save, serialize
     :undoc-members:
 
 ``proxy``
@@ -38,9 +39,9 @@ API Documentation
 ``tasks``
 ----------
 
-.. automodule:: bettercache.tasks
-    :members:
-    :undoc-members:
+.. autoclass:: bettercache.tasks.GeneratePage
+    :members: queue
+    :undoc-members: 
 
 ``utils``
 ----------
@@ -53,5 +54,9 @@ API Documentation
 ----------
 
 .. automodule:: bettercache.views
-    :members:
-    :undoc-members:
+
+    ``cache_view``
+    
+        Callable version of the ``BetterView``
+
+    .. autoclass:: BetterView

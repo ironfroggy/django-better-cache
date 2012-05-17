@@ -3,6 +3,7 @@ from bettercache.utils import CachingMixin
 
 class TestAsyncMiddleware(object):
     """ Does not deal with middleware sideeffects """
+    
     def process_request(self, request):
         if not request.method in ('GET', 'HEAD',) or CachingMixin.should_bypass_cache(request):
             return None
@@ -15,11 +16,18 @@ class TestAsyncMiddleware(object):
 
 
 class BetterCacheMiddleware(CachingMixin):
+    """Serves responses from the cache is available, and schedules tasks
+    to update existing cache entries if they are too old. If a request
+    is not found in the cache, it is handled normally and then cached
+    for the next request.
+    """
+
     def process_request(self, request):
         """
         Checks whether the page is already cached and returns the cached
         version if available.
         """
+
         celery_task = getattr(request, '_cache_update_cache', False)
         if not request.method in ('GET', 'HEAD'):
             request._cache_update_cache = False

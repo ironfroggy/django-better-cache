@@ -1,4 +1,11 @@
-# Create your views here.
+"""Fulfills a request by passing it along to another server, if this one
+cannot fulfill it.
+
+This is used in configurations where bettercache runs on its own, acting
+solely as a caching layer, and deferring requests it does not have in the
+cache. 
+"""
+
 from httplib2 import Http
 
 from django.http import HttpResponse
@@ -12,6 +19,7 @@ if getattr(settings, 'BETTERCACHE_ORIGIN_PORT', None):
 
 
 def proxy(request):
+    """Pass an HTTP request on to another server."""
 
     # TODO: don't hardcode http
     uri = "http://" + HOST + request.META['PATH_INFO']
@@ -39,6 +47,7 @@ def proxy(request):
 
 def header_name(name):
     """Convert header name like HTTP_XXXX_XXX to Xxxx-Xxx:"""
+    
     words = name[5:].split('_')
     for i in range(len(words)):
         words[i] = words[i][0].upper() + words[i][1:].lower()
