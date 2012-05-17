@@ -20,6 +20,7 @@ Table of Contents
 
    templatetags
    cachemodel
+   api
    roadmap
 
 

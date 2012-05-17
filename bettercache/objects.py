@@ -52,6 +52,8 @@ class CacheModel(object):
         return keys
         
     def keys(self):
+        """Create an ordered dict of the names and values of key fields."""
+
         keys = OrderedDict()
 
         def order_key((k, v)):
