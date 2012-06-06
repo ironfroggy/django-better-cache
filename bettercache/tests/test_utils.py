@@ -1,6 +1,6 @@
 import time
 from datetime import timedelta
-from unittest2 import TestCase
+from unittest import TestCase
 
 import mock
 
