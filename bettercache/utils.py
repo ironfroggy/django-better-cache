@@ -51,10 +51,7 @@ class CachingMixin(object):
 
 
     def session_accessed(self, request):
-        """``from django.middleware.cache.UpdateCacheMiddleware._session_accesed``
-        
-        I don't know what would cause sessions.acccessed to be there so I'm just copypasting.
-        """
+        """from django.middleware.cache.UpdateCacheMiddleware._session_accesed"""
 
         try:
             return request.session.accessed

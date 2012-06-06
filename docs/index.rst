@@ -8,9 +8,9 @@ Welcome to Django Better Cache's documentation!
 ===============================================
 
 Better Cache originally provided a replacement ``{% cache %}`` tag, but as of
-version 0.5 includes a Cache ORM module, as well. Overall, the aim is to
-simplify and empower your use of caches with sane defaults and obvious
-behaviors.
+version 0.6 includes a Cache ORM module and a suite of caching and proxy tools.
+Overall, the aim is to simplify and empower your use of caches with sane
+defaults and obvious behaviors.
 
 Table of Contents
 -----------------
