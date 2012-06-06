@@ -14,7 +14,11 @@ class GeneratePage(Task, CachingMixin):
     in the cache if appropriate.
     
     Updating cached responses via celery allows a caching server or
-    middleware to 
+    middleware to serve up an existing cache entry, and then ensure it gets
+    updated with a new copy without waiting for the new copy before handing
+    a response back for the current request. This keeps the cache up to date,
+    and the response times minimal. Cache expirations don't imply a hidden
+    danger of latency.
     """
     
     queue = 'pagegen'
