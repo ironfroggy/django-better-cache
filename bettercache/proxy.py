@@ -10,7 +10,20 @@ from httplib2 import Http
 
 from django.http import HttpResponse
 from django.conf import settings
-from django.core.servers.basehttp import is_hop_by_hop
+
+try:
+    from django.core.servers.basehttp import is_hop_by_hop
+except ImportError:
+    # Removed in Django 1.4
+    _hop_headers = {
+        'connection':1, 'keep-alive':1, 'proxy-authenticate':1,
+        'proxy-authorization':1, 'te':1, 'trailers':1, 'transfer-encoding':1,
+        'upgrade':1
+    }
+
+    def is_hop_by_hop(header_name):
+        """Return true if 'header_name' is an HTTP/1.1 "Hop-by-Hop" header"""
+        return header_name.lower() in _hop_headers
 
 HOST = getattr(settings, 'BETTERCACHE_ORIGIN_HOST', 'localhost')
 

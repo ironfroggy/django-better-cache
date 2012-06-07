@@ -1,2 +1,2 @@
 django-celery
-django
+django==1.4
