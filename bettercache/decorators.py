@@ -4,6 +4,24 @@ from bettercache.objects import CacheModel, Key, Field
 
 
 class CachedMethod(CacheModel):
+    """Caches the result of a callable based on the arguments it was called with, but also on a list of attributes on the instance the method is called on.
+    
+    ::
+
+        class Home(object):
+
+            def __init__(self, address):
+                self.address = address
+
+            @CachedMethod('address')
+            def geocode(self):
+                return g.geocode(self.address)
+
+    This example caches each call to ``geocode()`` uniquele for each value
+    of the ``address`` attribute.
+
+    """
+
     module = Key()
     classname = Key()
     method_name = Key()
@@ -15,6 +33,10 @@ class CachedMethod(CacheModel):
 
     @classmethod
     def cache(cls, key_attrs, expires=None):
+        """Decorates a method to provide cached-memoization using a
+        combination of the positional arguments, keyword argments, and
+        whitelisted instance attributes.
+        """
 
         def decorator(func):
 
@@ -40,7 +62,7 @@ class CachedMethod(CacheModel):
                     data[key_attr] = key_value
                 data = sorted(data.items())
                 
-                result_cache, new = CachedFormMethod.get_or_create(
+                result_cache, new = cls.get_or_create(
                     module=module,
                     classname=classname,
                     method_name=method_name,
@@ -61,6 +83,10 @@ class CachedMethod(CacheModel):
 
 
 class CachedFormMethod(CachedMethod):
+    """This specialized subclass of ``CachedMethod`` caches uniquely based
+    on the result of cleaned form data. It is intended to decorate methods
+    of Django ``Form`` subclasses.
+    """
 
     @classmethod
     def cache(cls, expires=None):

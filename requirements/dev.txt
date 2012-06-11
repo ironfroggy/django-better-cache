@@ -1,0 +1,2 @@
+django-celery
+django==1.3
