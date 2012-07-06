@@ -2,10 +2,10 @@ from bettercache.utils import CachingMixin, strip_wsgi
 from bettercache.proxy import proxy
 
 import logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class BetterView(CachingMixin):
-    """Accepts any path and attempts to server it from the cache. If it cannot
+    """Accepts any path and attempts to serve it from the cache. If it cannot
     find the response in the cache, it will use ``bettercache.proxy`` to fulfill
     it, and cache the response.
     """
@@ -17,23 +17,23 @@ class BetterView(CachingMixin):
             response, expired = self.get_cache(request)
             # send off the celery task if it's expired
             if expired:
-                logger.info("sending task for %s" %request.build_absolute_uri())
+                logger.info("EXPIRED sending task for %s" % request.build_absolute_uri())
                 self.send_task(request, response)
             elif response:
-                logger.info("not sending task for %s" %request.build_absolute_uri())
+                logger.info("not sending task for %s" % request.build_absolute_uri())
             else:
-                logger.info("cache miss for %s" %request.build_absolute_uri())
+                logger.info("MISS for: %s" % request.build_absolute_uri())
 
         # if response is still none we have to proxy
         if response is None:
-            logger.info('request %s proxied' %request.build_absolute_uri())
+            logger.info('proxying request: %s' % request.build_absolute_uri())
             response = proxy(request)
             #TODO: delete the following two lines
             #self.set_cache(request, response)
             response['X-Bettercache-Proxy'] = 'true'
         else:
             response['X-Bettercache-Proxy'] = 'false'
-            logger.info('request %s from cache' %request.build_absolute_uri())
+            logger.info('HIT for: %s' % request.build_absolute_uri())
 
         return response
 
