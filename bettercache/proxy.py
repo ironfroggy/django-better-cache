@@ -56,7 +56,7 @@ def proxy(request):
     for name, val in info.items():
         if not is_hop_by_hop(name):
             response[name] = val
-    logger.debug("PROXIED to: %s" % uri)
+    logger.info("PROXY to: %s" % uri)
     return response
 
 
