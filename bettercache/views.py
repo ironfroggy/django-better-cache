@@ -26,10 +26,8 @@ class BetterView(CachingMixin):
 
         # if response is still none we have to proxy
         if response is None:
-            logger.info('PROXY from: %s' % request.build_absolute_uri())
+            logger.debug('PROXY from: %s' % request.build_absolute_uri())
             response = proxy(request)
-            #TODO: delete the following two lines
-            #self.set_cache(request, response)
             response['X-Bettercache-Proxy'] = 'true'
         else:
             response['X-Bettercache-Proxy'] = 'false'
