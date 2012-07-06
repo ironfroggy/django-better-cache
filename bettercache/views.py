@@ -20,7 +20,7 @@ class BetterView(CachingMixin):
                 logger.info("EXPIRED sending task for %s" % request.build_absolute_uri())
                 self.send_task(request, response)
             elif response:
-                logger.info("not sending task for %s" % request.build_absolute_uri())
+                logger.debug("not sending task for %s" % request.build_absolute_uri())
             else:
                 logger.info("MISS for: %s" % request.build_absolute_uri())
 
