@@ -50,6 +50,7 @@ def proxy(request):
     # TODO: try/except
     http = Http()
     http.follow_redirects = False
+    logger.debug("GET for: %s" % uri)
     info, content = http.request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 
