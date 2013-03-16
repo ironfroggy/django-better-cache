@@ -1,4 +1,5 @@
 import os
+import django
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 DEBUG = True
@@ -14,10 +15,13 @@ CACHES = {
 BETTERCACHE_LOCAL_POSTCHECK = 120
 DATABASES = {
     'default': {
-                'ENGINE': 'sqlite3',
-                'NAME': ':memory:',
+        'ENGINE': 'sqlite3',
+        'NAME': ':memory:',
     }
 }
+if django.VERSION >= (1, 3):
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
 ADMINS = ( )
 TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
@@ -31,3 +35,4 @@ TEMPLATE_LOADERS = (
 )
 TEMPLATE_DIRS = ( os.path.join(PROJECT_ROOT, 'templates'),)
 MIDDLEWARE_CLASSES = ( )
+SECRET_KEY = "test"
