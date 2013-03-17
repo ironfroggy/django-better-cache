@@ -32,7 +32,9 @@ The bettercache :doc:`cache template tag </templatetags>` provides some automati
 
 Cache ORM
 _________
-Caching can be more than a string and random object. ``bettercache.objects`` provides an ORM interface to structure caching and manage keys for you, replacing a mix-mash of adhoc key generation and fragile object pickling with stabl cache models and key management.
+Caching can be more than a string and random object. ``bettercache.objects`` provides an
+ORM interface to structure caching and manage keys for you, replacing a mix-mash of adhoc key generation and fragile object pickling with stable cache models and key management,
+via the :ref:`cachemodel <intro-to-cachemodel>`.
 
 Middleware
 __________

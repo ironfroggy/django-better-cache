@@ -1,3 +1,5 @@
+.. _intro-to-cachemodel:
+
 CacheModel
 ==========
 
@@ -32,7 +34,32 @@ populate with data to be stored in the cache. The creation of keys are
 automatic, based on the ``CacheModel`` class and the values given for all
 the ``Key`` fields for an instance.
 
-The cache objects can save any fields with JSON-serializable values.
+The cache objects can save any fields with JSON-serializable values, but
+this does not include other instances of ``CacheModel``. If you'd like
+to connect multiple cached entities, you can do so with the field type
+``Reference``.
+
+::
+
+    class Workplace(CacheModel):
+        name = Key()
+        phone = Field()
+        address = Field()
+        employee_count = Field()
+
+    class User(CacheModel):
+        username = Key()
+        email = Field()
+        full_name = Field()
+
+        workplace = Reference(Workplace)
+        
+        mother = Reference('self')
+        father = Reference('self')
+    
+``Reference`` fields are created with a single argument: either a
+``CacheModel`` class which the field must reference, or ``'self'`` to
+refernce instances of the same class as itself.
 
 
 CachedMethod
