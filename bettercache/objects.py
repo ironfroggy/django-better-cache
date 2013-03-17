@@ -38,6 +38,8 @@ class CacheModel(object):
             if field.name is None:
                 field.name = name
             known_fields.add(field.name)
+            if isinstance(field, Reference) and field.cls == 'self':
+                field.cls = type(self)
 
         self._data = {}
         
@@ -218,10 +220,15 @@ class Reference(Field):
         super(Reference, self).__init__(*args, **kwargs)
     
     def python_to_cache(self, value):
+        if value is None:
+            return None
+
         keys = value.keys()
         return super(Reference, self).python_to_cache(keys)
 
     def cache_to_python(self, value):
+        if value is None:
+            return None
         value = super(Reference, self).cache_to_python(value)
         ref = self.cls.get(**value)
         return ref

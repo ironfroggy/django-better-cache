@@ -42,6 +42,11 @@ class R(CacheModel):
     k = Key()
     ref = Reference(C)
 
+class S(CacheModel):
+    k = Key()
+    value = Field()
+    ref = Reference('self')
+
 
 class ModelTest(unittest.TestCase):
 
@@ -134,4 +139,13 @@ class ModelTest(unittest.TestCase):
         def get():
             value = R.get(k='bar')
         self.assertRaises(CacheModel.Missing, get)
+
+    def test_self_reference(self):
+        foo = S(k="foo", value=10, ref=None)
+        foo.save()
+        bar = S(k="bar", value=20, ref=foo)
+        bar.save()
+
+        self.assertEqual(10, S.get(k="bar").ref.value)
+
 
