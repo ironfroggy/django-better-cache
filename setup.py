@@ -8,7 +8,7 @@ if version_info < (2, 7):
     install_requires.append('ordereddict')
 
 setup(name='bettercache',
-    version='0.6',
+    version='0.6.1',
     description = "A suite of better cache tools for Django.",
     license = "MIT",
     author='Calvin Spealman, Cox Media Group',
