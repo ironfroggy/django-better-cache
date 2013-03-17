@@ -223,7 +223,8 @@ class Reference(Field):
 
     def cache_to_python(self, value):
         value = super(Reference, self).cache_to_python(value)
-        return self.cls.get(**value)
+        ref = self.cls.get(**value)
+        return ref
 
 
 class Key(Field):
