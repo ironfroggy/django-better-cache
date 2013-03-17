@@ -1,4 +1,4 @@
-from bettercache.objects import CacheModel, Field, Key, PickleField
+from bettercache.objects import CacheModel, Field, Key, PickleField, Reference
 import unittest
 
 
@@ -34,6 +34,10 @@ class F(CacheModel):
 class P(CacheModel):
     k = Key()
     p = PickleField()
+
+class R(CacheModel):
+    k = Key()
+    ref = Reference(C)
 
 
 class ModelTest(unittest.TestCase):
@@ -105,4 +109,12 @@ class ModelTest(unittest.TestCase):
         p.save()
 
         self.assertEqual(s, P.get(k=1).p)
+
+    def test_reference(self):
+        foo = C(name="foo", value=10)
+        foo.save()
+        bar = R(k="bar", ref=foo)
+        bar.save()
+
+        self.assertEqual(10, R.get(k="bar").ref.value)
 

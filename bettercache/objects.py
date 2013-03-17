@@ -211,6 +211,20 @@ class PickleField(Field):
     def cache_to_python(self, value):
         return pickle.loads(value.encode('ascii'))
 
+class Reference(Field):
+
+    def __init__(self, cls, *args, **kwargs):
+        self.cls = cls
+        super(Reference, self).__init__(*args, **kwargs)
+    
+    def python_to_cache(self, value):
+        keys = value.keys()
+        return super(Reference, self).python_to_cache(keys)
+
+    def cache_to_python(self, value):
+        value = super(Reference, self).cache_to_python(value)
+        return self.cls.get(**value)
+
 
 class Key(Field):
     pass
