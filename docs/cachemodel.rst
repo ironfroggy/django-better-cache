@@ -1,3 +1,5 @@
+.. _intro-to-cachemodel:
+
 CacheModel
 ==========
 
@@ -32,7 +34,32 @@ populate with data to be stored in the cache. The creation of keys are
 automatic, based on the ``CacheModel`` class and the values given for all
 the ``Key`` fields for an instance.
 
-The cache objects can save any fields with JSON-serializable values.
+The cache objects can save any fields with JSON-serializable values, but
+this does not include other instances of ``CacheModel``. If you'd like
+to connect multiple cached entities, you can do so with the field type
+``Reference``.
+
+::
+
+    class Workplace(CacheModel):
+        name = Key()
+        phone = Field()
+        address = Field()
+        employee_count = Field()
+
+    class User(CacheModel):
+        username = Key()
+        email = Field()
+        full_name = Field()
+
+        workplace = Reference(Workplace)
+        
+        mother = Reference('self')
+        father = Reference('self')
+    
+``Reference`` fields are created with a single argument: either a
+``CacheModel`` class which the field must reference, or ``'self'`` to
+refernce instances of the same class as itself.
 
 
 CachedMethod
@@ -119,17 +146,25 @@ API Reference
     which the object will be saved to the cache and returned back from
     the original ``get()`` call in the first place.
 
+``Key``
+    At least one of your fields must be defined as a ``Key``, which
+    will be combined with the class information to generate a unique
+    key to identify the object in the cache.
+
 ``Field``
     In your ``CacheModel``, you should define one or more ``Field``
     properties. The values of these properties in your instance will
     all be serialized and sent to the cache when the object is saved.
+
+``Reference``
+    If a field needs to contain other ``CacheModel`` instances, you may
+    use the special field type ``Reference``, which will fetch the referenced
+    instance from the cache at load time. If any referenced fields in
+    a model are missing, the entire model is considered invalid and a
+    ``get()`` will raise a ``CacheModel.Missing`` exception.
 
 ``PickleField``
     Special field type which uses the python ``pickle`` format, rather
     than ``JSON``, for serialization. This should only be used in
     special cases, as pickle has a number of drawbacks and corner cases.
 
-``Key``
-    At least one of your fields must be defined as a ``Key``, which
-    will be combined with the class information to generate a unique
-    key to identify the object in the cache.

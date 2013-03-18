@@ -1,5 +1,8 @@
-from bettercache.objects import CacheModel, Field, Key, PickleField
 import unittest
+
+from django.core.cache import cache
+
+from bettercache.objects import CacheModel, Field, Key, PickleField, Reference
 
 
 class A(CacheModel):
@@ -35,8 +38,20 @@ class P(CacheModel):
     k = Key()
     p = PickleField()
 
+class R(CacheModel):
+    k = Key()
+    ref = Reference(C)
+
+class S(CacheModel):
+    k = Key()
+    value = Field()
+    ref = Reference('self')
+
 
 class ModelTest(unittest.TestCase):
+
+    def tearDown(self):
+        cache.clear()
 
     def test_key_order(self):
         keys = A(a=1, b=2).keys().items()
@@ -105,4 +120,32 @@ class ModelTest(unittest.TestCase):
         p.save()
 
         self.assertEqual(s, P.get(k=1).p)
+
+    def test_reference(self):
+        foo = C(name="foo", value=10)
+        foo.save()
+        bar = R(k="bar", ref=foo)
+        bar.save()
+
+        self.assertEqual(10, R.get(k="bar").ref.value)
+
+    def test_reference_invalidate_parent(self):
+        foo = C(name="foo", value=10)
+        foo.save = None
+        # foo is unsaved! Same as expired or purged.
+        bar = R(k="bar", ref=foo)
+        bar.save()
+
+        def get():
+            value = R.get(k='bar')
+        self.assertRaises(CacheModel.Missing, get)
+
+    def test_self_reference(self):
+        foo = S(k="foo", value=10, ref=None)
+        foo.save()
+        bar = S(k="bar", value=20, ref=foo)
+        bar.save()
+
+        self.assertEqual(10, S.get(k="bar").ref.value)
+
 
