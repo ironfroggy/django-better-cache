@@ -97,11 +97,11 @@ class CachingMixin(object):
 
         cc_dict = get_header_dict(response, 'Cache-Control')
         if cc_dict:
-            if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
+            if 'max-age' in cc_dict and cc_dict['max-age'] == '0':
                 return True
-            if cc_dict.has_key('no-cache'):
+            if 'no-cache' in cc_dict:
                 return True
-            if cc_dict.has_key('private'):
+            if 'private' in cc_dict:
                 return True
         if response.has_header('Expires'):
             if parse_http_date(response['Expires']) < time.time():

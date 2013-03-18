@@ -54,7 +54,7 @@ class ModelTest(unittest.TestCase):
         cache.clear()
 
     def test_key_order(self):
-        keys = A(a=1, b=2).keys().items()
+        keys = list(A(a=1, b=2).keys().items())
         self.assertEqual(keys[0], ('a', 1))
         self.assertEqual(keys[1], ('b', 2))
 

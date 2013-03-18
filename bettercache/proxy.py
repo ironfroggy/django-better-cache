@@ -42,7 +42,7 @@ def proxy(request):
         uri += '?' + request.META['QUERY_STRING']
 
     headers = {}
-    for name, val in request.environ.iteritems():
+    for name, val in request.environ.items():
         if name.startswith('HTTP_'):
             name = header_name(name)
             headers[name] = val

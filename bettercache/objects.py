@@ -6,8 +6,12 @@ similar interface to access data in a cache, for adding, finding, updating,
 or invalidating entries easily.
 """
 
+import base64
 import json
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 try:
     from collections import OrderedDict
 except ImportError:
@@ -67,7 +71,8 @@ class CacheModel(object):
 
         keys = OrderedDict()
 
-        def order_key((k, v)):
+        def order_key(kv):
+            k, v = kv
             cache_key = getattr(type(self), k)
             return cache_key.order
         
@@ -208,10 +213,10 @@ class PickleField(Field):
     """Alternative serialization using Pickle format."""
 
     def python_to_cache(self, value):
-        return pickle.dumps(value)
+        return base64.b64encode(pickle.dumps(value)).decode('ascii')
 
     def cache_to_python(self, value):
-        return pickle.loads(value.encode('ascii'))
+        return pickle.loads(base64.b64decode(value))
 
 class Reference(Field):
 

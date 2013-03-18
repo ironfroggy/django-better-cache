@@ -84,20 +84,13 @@ class CachingTestMeta(type):
         return super(CachingTestMeta, cls).__new__(cls, name, bases, attrs)
 
 
-class CachingTestCase(TestCase):
-    """ CachingTestCase is a specific test case for cache invalidation
+CachingTestCase = type('CachingTestCase', (CachingTestMeta,), {
+    '__doc__': """ CachingTestCase is a specific test case for cache invalidation
         It should only include tests for cache invaldation.
         To use it define the following:
         keyre: a refular expression that describes the key or keys you want to test
         setFun(self): a function which will set the keys
         test_foo(self, *args, **kwargs) any number of functions that should reset or delete the tracked keys 
         setUp and tearDown can be defined as normal
-    """
-    __metaclass__ = CachingTestMeta
-
-    def setFun(self):
-        pass
-    def setUp(self):
-        pass
-    def tearDown(self):
-        pass
+    """,
+})
