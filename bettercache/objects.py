@@ -7,7 +7,10 @@ or invalidating entries easily.
 """
 
 import json
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 try:
     from collections import OrderedDict
 except ImportError:
@@ -22,7 +25,7 @@ class CacheModel(object):
     defines tables or other schema. The structure is a series of fields
     and keys, and instances of ``CacheModel`` can be saved to the cache
     and fetched back if you know the keys.
-    
+
     You do not need to construct key strings by hand.
     """
 
@@ -40,7 +43,7 @@ class CacheModel(object):
             known_fields.add(field.name)
 
         self._data = {}
-        
+
         for name, value in kwargs.items():
             if name in known_fields:
                 setattr(self, name, value)
@@ -59,16 +62,17 @@ class CacheModel(object):
         keys['$MODULE'] = type(self).__module__
         keys['$CLASS'] = type(self).__name__
         return keys
-        
+
     def keys(self):
         """Create an ordered dict of the names and values of key fields."""
 
         keys = OrderedDict()
 
-        def order_key((k, v)):
+        def order_key(_):
+            (k, v) = _
             cache_key = getattr(type(self), k)
             return cache_key.order
-        
+
         items = [(k, getattr(type(self), k)) for k
             in dir(type(self))
         ]
@@ -155,7 +159,7 @@ class CacheModel(object):
 
     def from_miss(self, **kwargs):
         """Called to initialize an instance when it is not found in the cache.
-        
+
         For example, if your CacheModel should pull data from the database to
         populate the cache,
 
@@ -166,7 +170,7 @@ class CacheModel(object):
                 self.email = user.email
                 self.full_name = user.get_full_name()
         """
-    
+
         raise type(self).Missing(type(self)(**kwargs).key())
 
     def delete(self):
@@ -206,7 +210,7 @@ class PickleField(Field):
     """Alternative serialization using Pickle format."""
 
     def python_to_cache(self, value):
-        return pickle.dumps(value)
+        return pickle.dumps(value, 0).decode('ascii')
 
     def cache_to_python(self, value):
         return pickle.loads(value.encode('ascii'))
@@ -214,4 +218,3 @@ class PickleField(Field):
 
 class Key(Field):
     pass
-

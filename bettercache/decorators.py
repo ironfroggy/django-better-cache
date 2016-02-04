@@ -2,10 +2,15 @@ import functools
 
 from bettercache.objects import CacheModel, Key, Field
 
+try:
+    basestring
+except NameError:
+    basestring = str
+
 
 class CachedMethod(CacheModel):
     """Caches the result of a callable based on the arguments it was called with, but also on a list of attributes on the instance the method is called on.
-    
+
     ::
 
         class Home(object):
@@ -46,7 +51,7 @@ class CachedMethod(CacheModel):
                 classname = type(self).__name__
                 method_name = func.__name__
 
-                data = {} 
+                data = {}
                 if isinstance(key_attrs, basestring):
                     _key_attrs = key_attrs.split()
                 else:
@@ -61,7 +66,7 @@ class CachedMethod(CacheModel):
                         key_value = (type(key_value).__name__, key_value)
                     data[key_attr] = key_value
                 data = sorted(data.items())
-                
+
                 result_cache, new = cls.get_or_create(
                     module=module,
                     classname=classname,

@@ -1,7 +1,8 @@
 from unittest import TestCase
-
-import mock
-
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 from django.conf import settings
 
 from bettercache.proxy import proxy, header_name
@@ -33,5 +34,5 @@ class TestProxy(TestCase):
         headers = {'Host': 'example.com', 'X-Foo': 'foobar', 'Cache-Control': 'cache-headers'}
         self.assertEqual(req_kwargs['headers'], headers)
         self.assertEqual(resp['Cache-Control'], 'no-cache')
-        self.assertEqual(resp.content, 'bar')
+        self.assertEqual(resp.content, b'bar')
         self.assertFalse(hasattr(resp, 'Keep-Alive'))

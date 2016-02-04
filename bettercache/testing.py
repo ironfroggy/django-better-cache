@@ -1,3 +1,5 @@
+from six import with_metaclass
+
 from django.test import TestCase
 
 class FakeCache(object):
@@ -68,7 +70,7 @@ class CachingTestMeta(type):
                 self.assertTrue(key in changed_keys) #TODO: make this explicit when it fails
 
         nattrs = {}
-        for key, val in attrs.items():
+        for key, val in list(attrs.items()):
             if callable(val) and key[:4] == 'test':
                 testfun = attrs.pop(key)
                 # args and kwargs probably aren't necessary
@@ -84,16 +86,15 @@ class CachingTestMeta(type):
         return super(CachingTestMeta, cls).__new__(cls, name, bases, attrs)
 
 
-class CachingTestCase(TestCase):
+class CachingTestCase(with_metaclass(CachingTestMeta, TestCase)):
     """ CachingTestCase is a specific test case for cache invalidation
         It should only include tests for cache invaldation.
         To use it define the following:
         keyre: a refular expression that describes the key or keys you want to test
         setFun(self): a function which will set the keys
-        test_foo(self, *args, **kwargs) any number of functions that should reset or delete the tracked keys 
+        test_foo(self, *args, **kwargs) any number of functions that should reset or delete the tracked keys
         setUp and tearDown can be defined as normal
     """
-    __metaclass__ = CachingTestMeta
 
     def setFun(self):
         pass

@@ -1,8 +1,10 @@
 import time
 from datetime import timedelta
 from unittest import TestCase
-
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 from django.conf import settings
 from django.http import HttpResponse, HttpRequest
@@ -52,13 +54,13 @@ class TestDict(TestCase):
         resp = HttpResponse()
         ccdict = dict(x='1', y=True)
         set_header_dict(resp, 'Cache-Control', ccdict)
-        self.assertEqual(resp['Cache-Control'], 'y, x=1')
+        self.assertIn(resp['Cache-Control'], ('y, x=1', 'x=1, y'))
 
 
 class TestCachingMixin(TestCase):
 
 
-    def set_settings(self, settings): 
+    def set_settings(self, settings):
         settings.BETTERCACHE_ANONYMOUS_ONLY = False
         settings.BETTERCACHE_EDGE_MAXAGE = '1d'
         settings.BETTERCACHE_CACHE_MAXAGE = 60
@@ -105,7 +107,7 @@ class TestCachingMixin(TestCase):
         resp.status_code=500
         self.assertFalse(cm.should_cache(req, resp))
         resp.status_code=200
-        req._cache_update_cache = False 
+        req._cache_update_cache = False
         self.assertFalse(cm.should_cache(req, resp))
 
     def test_uncacheable_headers(self):
@@ -141,9 +143,9 @@ class TestCachingMixin(TestCase):
         self.assertEquals(cm.get_cache(req), (None, None))
         cm.cache_key = lambda x: 'test_key'
         self.assertEquals(cm.get_cache(req), (None, None))
-        fake_cache.set('test_key', ('resp', time.time() - 3600)) 
+        fake_cache.set('test_key', ('resp', time.time() - 3600))
         self.assertEquals(cm.get_cache(req), ('resp', True))
-        fake_cache.set('test_key', ('resp', time.time() + 3600)) 
+        fake_cache.set('test_key', ('resp', time.time() + 3600))
         self.assertEquals(cm.get_cache(req), ('resp', False))
 
     @mock.patch('bettercache.utils.cache')

@@ -1,6 +1,9 @@
 from unittest import TestCase
-import mock
-from bettercache.middleware import BetterCacheMiddleware 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+from bettercache.middleware import BetterCacheMiddleware
 
 
 class TestMiddleware(TestCase):

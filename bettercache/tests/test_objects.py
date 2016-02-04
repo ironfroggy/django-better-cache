@@ -1,4 +1,4 @@
-from bettercache.objects import CacheModel, Field, Key, PickleField
+from bettercache.objects import CacheModel, Field, Key, PickleField, _cache
 import unittest
 
 
@@ -39,9 +39,11 @@ class P(CacheModel):
 class ModelTest(unittest.TestCase):
 
     def test_key_order(self):
-        keys = A(a=1, b=2).keys().items()
-        self.assertEqual(keys[0], ('a', 1))
-        self.assertEqual(keys[1], ('b', 2))
+        keys = iter(A(a=1, b=2).keys().items())
+        key1 = next(keys)
+        key2 = next(keys)
+        self.assertEqual(key1, ('a', 1))
+        self.assertEqual(key2, ('b', 2))
 
     def test_name_override(self):
         self.assertEqual(B(y=10).y, 10)
@@ -105,4 +107,3 @@ class ModelTest(unittest.TestCase):
         p.save()
 
         self.assertEqual(s, P.get(k=1).p)
-

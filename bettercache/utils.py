@@ -24,7 +24,7 @@ class CachingMixin(object):
             try:
                 vdict.pop('cookie')
             except KeyError:
-                pass 
+                pass
             else:
                 set_header_dict(response, 'Vary', vdict)
 
@@ -74,7 +74,7 @@ class CachingMixin(object):
     @staticmethod
     def should_bypass_cache(request):
         """ Should a request not be served from cache """
-        
+
         try:
             if 'no-cache' in request.META['HTTP_CACHE_CONTROL']:
                 return True
@@ -84,7 +84,7 @@ class CachingMixin(object):
 
     def should_regenerate(self, response):
         """ Check if this page was originally generated less than LOCAL_POSTCHECK seconds ago """
-        
+
         if response.has_header('Last-Modified'):
             last_modified = parse_http_date(response['Last-Modified'])
             next_regen = last_modified + settings.BETTERCACHE_LOCAL_POSTCHECK
@@ -97,11 +97,11 @@ class CachingMixin(object):
 
         cc_dict = get_header_dict(response, 'Cache-Control')
         if cc_dict:
-            if cc_dict.has_key('max-age') and cc_dict['max-age'] == '0':
+            if 'max-age' in cc_dict and cc_dict['max-age'] == '0':
                 return True
-            if cc_dict.has_key('no-cache'):
+            if 'no-cache' in cc_dict:
                 return True
-            if cc_dict.has_key('private'):
+            if 'private' in cc_dict:
                 return True
         if response.has_header('Expires'):
             if parse_http_date(response['Expires']) < time.time():
@@ -160,7 +160,7 @@ class CachingMixin(object):
 
 def get_header_dict(response, header):
     """ returns a dictionary of the cache control headers
-        the same as is used by django.utils.cache.patch_cache_control 
+        the same as is used by django.utils.cache.patch_cache_control
         if there are no Cache-Control headers returns and empty dict
     """
     def dictitem(s):

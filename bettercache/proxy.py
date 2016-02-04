@@ -3,9 +3,10 @@ cannot fulfill it.
 
 This is used in configurations where bettercache runs on its own, acting
 solely as a caching layer, and deferring requests it does not have in the
-cache. 
+cache.
 """
 
+import six
 from httplib2 import Http
 
 from django.http import HttpResponse
@@ -40,7 +41,7 @@ def proxy(request):
         uri += '?' + request.META['QUERY_STRING']
 
     headers = {}
-    for name, val in request.environ.iteritems():
+    for name, val in six.iteritems(request.environ):
         if name.startswith('HTTP_'):
             name = header_name(name)
             headers[name] = val
@@ -60,7 +61,7 @@ def proxy(request):
 
 def header_name(name):
     """Convert header name like HTTP_XXXX_XXX to Xxxx-Xxx:"""
-    
+
     words = name[5:].split('_')
     for i in range(len(words)):
         words[i] = words[i][0].upper() + words[i][1:].lower()
