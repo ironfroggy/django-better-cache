@@ -15,6 +15,8 @@ API Documentation
 
 .. autoclass:: bettercache.handlers.AsyncHandler
 
+.. _api-middleware:
+
 ``middleware``
 ---------------
 
@@ -35,6 +37,8 @@ API Documentation
 .. automodule:: bettercache.proxy
     :members:
     :undoc-members:
+
+.. _api-tasks:
 
 ``tasks``
 ----------

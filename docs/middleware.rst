@@ -24,6 +24,8 @@ Bettercache will cache a page under the following conditions
 * The request does not have any uncacheable headers. To change this override
   `has_uncacheable_headers`.
 
+See the :ref:`task API docs <api-tasks>` for more information.
+
 Bettercache header manipulation
 ________________________________
 The bettercache middleware will change some of the request headers before it caches a page for the first time.
@@ -34,6 +36,8 @@ The bettercache middleware will change some of the request headers before it cac
   - `post-check` is set to `BETTERCACHE_EDGE_POSTCECK_RATIO` * the `max-age`.
 * The `Edge-Control` header is set with `cache-maxage` to `BETTERCACHE_EDGE_MAXAGE`.
 
+.. _intro-to-middleware:
+
 Bettercache middleware settings
 ________________________________
 The following settings are currently aspirational but the changes should be coming soon.
@@ -42,6 +46,8 @@ The following settings are currently aspirational but the changes should be comi
 * BETTERCACHE_EXTERNAL_POSTCHECK_RATIO - the ratio of max_age to set the Cache-Control post-check header to
 * BETTERCACHE_LOCAL_MAXAGE - the number of seconds to cache pages for locally
 * BETTERCACHE_LOCAL_POSTCHECK - the number of seconds after which to attempt to regenerate a page locally
+
+See the :ref:`middleware API docs <api-middleware>` for more information.
 
 Betterache middleware TODO list
 ________________________________

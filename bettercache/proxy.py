@@ -8,6 +8,7 @@ cache.
 
 import six
 from httplib2 import Http
+import logging
 
 from django.http import HttpResponse
 from django.conf import settings
@@ -27,6 +28,7 @@ except ImportError:
         return header_name.lower() in _hop_headers
 
 HOST = getattr(settings, 'BETTERCACHE_ORIGIN_HOST', 'localhost')
+logger = logging.getLogger(__name__)
 
 if getattr(settings, 'BETTERCACHE_ORIGIN_PORT', None):
     HOST += ":" + str(settings.BETTERCACHE_ORIGIN_PORT)
@@ -49,13 +51,14 @@ def proxy(request):
     # TODO: try/except
     http = Http()
     http.follow_redirects = False
+    logger.debug("GET for: %s" % uri)
     info, content = http.request(uri, 'GET', headers=headers)
     response = HttpResponse(content, status=info.pop('status'))
 
     for name, val in info.items():
         if not is_hop_by_hop(name):
             response[name] = val
-
+    logger.info("PROXY to: %s" % uri)
     return response
 
 

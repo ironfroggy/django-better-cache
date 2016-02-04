@@ -28,15 +28,19 @@ Table of Contents
 
 Template Tag
 _____________
-The bettercache cache template tag provides some automatic invalidation
+The bettercache :doc:`cache template tag </templatetags>` provides some automatic invalidation. 
+
+Cache ORM
+_________
+Caching can be more than a string and random object. ``bettercache.objects`` provides an ORM interface to structure caching and manage keys for you, replacing a mix-mash of adhoc key generation and fragile object pickling with stabl cache models and key management.
 
 Middleware
 __________
-Bettercache middleware serves as an improved version of the django caching middleware allowing better control of cache headers and easier to generate cache keys.
+Bettercache :ref:`middleware <intro-to-middleware>` serves as an improved version of the django caching middleware allowing better control of cache headers and easier to generate cache keys.
 
 Celery Task
 ___________
-The bettercache celery task allows most pages to be updated offline in a post check fashion. This means a user never has too wait for a slow page
+The bettercache :doc:`celery task </middleware>` allows most pages to be updated offline in a post check fashion. This means a user never has too wait for a slow page
 when serving a cached one would be acceptable.
 
 Proxy Server
