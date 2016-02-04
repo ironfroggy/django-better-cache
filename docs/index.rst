@@ -8,7 +8,7 @@ Welcome to Django Better Cache's documentation!
 ===============================================
 
 Better Cache originally provided a replacement ``{% cache %}`` tag, but as of
-version 0.6 includes a Cache ORM module and a suite of caching and proxy tools.
+version 0.7 includes a Cache ORM module and a suite of caching and proxy tools.
 Overall, the aim is to simplify and empower your use of caches with sane
 defaults and obvious behaviors.
 
@@ -28,7 +28,7 @@ Table of Contents
 
 Template Tag
 _____________
-The bettercache :doc:`cache template tag </templatetags>` provides some automatic invalidation. 
+The bettercache :doc:`cache template tag </templatetags>` provides some automatic invalidation.
 
 Cache ORM
 _________
@@ -73,4 +73,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
