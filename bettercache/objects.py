@@ -6,6 +6,7 @@ similar interface to access data in a cache, for adding, finding, updating,
 or invalidating entries easily.
 """
 
+import base64
 import json
 try:
     import cPickle as pickle
@@ -41,6 +42,8 @@ class CacheModel(object):
             if field.name is None:
                 field.name = name
             known_fields.add(field.name)
+            if isinstance(field, Reference) and field.cls == 'self':
+                field.cls = type(self)
 
         self._data = {}
 
@@ -214,6 +217,26 @@ class PickleField(Field):
 
     def cache_to_python(self, value):
         return pickle.loads(value.encode('ascii'))
+
+class Reference(Field):
+
+    def __init__(self, cls, *args, **kwargs):
+        self.cls = cls
+        super(Reference, self).__init__(*args, **kwargs)
+
+    def python_to_cache(self, value):
+        if value is None:
+            return None
+
+        keys = value.keys()
+        return super(Reference, self).python_to_cache(keys)
+
+    def cache_to_python(self, value):
+        if value is None:
+            return None
+        value = super(Reference, self).cache_to_python(value)
+        ref = self.cls.get(**value)
+        return ref
 
 
 class Key(Field):

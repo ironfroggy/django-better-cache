@@ -1,4 +1,5 @@
 import time
+from collections import OrderedDict
 from datetime import timedelta
 from unittest import TestCase
 try:
@@ -52,9 +53,9 @@ class TestDict(TestCase):
 
     def test_set_dict(self):
         resp = HttpResponse()
-        ccdict = dict(x='1', y=True)
+        ccdict = OrderedDict((('x', '1'), ('y', True)))
         set_header_dict(resp, 'Cache-Control', ccdict)
-        self.assertIn(resp['Cache-Control'], ('y, x=1', 'x=1, y'))
+        self.assertEqual(resp['Cache-Control'], 'x=1, y')
 
 
 class TestCachingMixin(TestCase):

@@ -2,10 +2,7 @@
 from sys import version_info
 from setuptools import setup, find_packages
 
-install_requires = [
-    'celery >= 2.4.2',
-    'httplib2 >= 0.6.0',
-]
+install_requires = ['httplib2']
 
 if version_info < (2, 7):
     install_requires.append('ordereddict')
